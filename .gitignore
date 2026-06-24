@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Generated figures (regenerate with `make figures` in project/)
+project/results/*.png
+
+# Jupyter
+.ipynb_checkpoints/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.nav
+*.snm
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*-blx.bib
+texput.log
+
+# Stray / unrelated scratch files (not part of this project)
+awq-deck-v4.html
+HUST_THEME_BEAMER___LATEX_BY_FRC.zip
+math_model.zip
+tzfhx79fnc-castle.zip
+/fig[1-8].png
+reimplement_fig7_points.ipynb
+
+# OS
+.DS_Store

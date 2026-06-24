@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nagatani (2006) — Chaos Control of Shuttle Buses — Interactive Demo</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0f1115;
+    --panel:#171a21;
+    --panel2:#1e2229;
+    --text:#e6e8ec;
+    --muted:#9aa3b2;
+    --accent:#5b9dff;
+    --accent2:#ff8a5b;
+    --good:#4fd17b;
+    --warn:#f3c44b;
+    --bad:#ff5b6e;
+    --border:#2a2f3a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:linear-gradient(160deg,#0f1115 0%, #11141b 60%, #0c0e12 100%);
+    color:var(--text);
+    font-family:"Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    min-height:100vh;
+  }
+  header{
+    padding:22px 28px 14px;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(90deg, rgba(91,157,255,0.12), rgba(255,138,91,0.06));
+  }
+  header h1{
+    margin:0 0 4px;
+    font-size:1.5rem;
+    font-weight:700;
+    letter-spacing:.2px;
+  }
+  header p{
+    margin:2px 0;
+    color:var(--muted);
+    font-size:.92rem;
+    line-height:1.5;
+  }
+  .formula{
+    display:inline-block;
+    margin-top:8px;
+    padding:8px 14px;
+    background:var(--panel2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:0.95rem;
+    color:#cfe0ff;
+  }
+  .formula sub{font-size:.7em;}
+
+  main{
+    display:grid;
+    grid-template-columns: 320px 1fr;
+    gap:18px;
+    padding:18px 22px 40px;
+    align-items:start;
+  }
+  @media (max-width: 980px){
+    main{grid-template-columns: 1fr;}
+  }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px 16px 18px;
+    box-shadow:0 4px 18px rgba(0,0,0,.25);
+  }
+  .panel h2{
+    font-size:1rem;
+    margin:0 0 12px;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .panel h2 .dot{
+    width:8px;height:8px;border-radius:50%;background:var(--accent);
+    display:inline-block;
+  }
+
+  .controls{position:sticky; top:18px;}
+  .slider-row{margin-bottom:14px;}
+  .slider-row label{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:.85rem; color:var(--muted); margin-bottom:4px;
+  }
+  .slider-row label b{color:var(--text); font-weight:600;}
+  .slider-row span.val{
+    font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+    background:var(--panel2); border:1px solid var(--border);
+    border-radius:6px; padding:1px 7px; color:var(--accent);
+    font-size:.82rem;
+  }
+  input[type=range]{
+    width:100%;
+    accent-color: var(--accent);
+    height:4px;
+  }
+
+  .presets{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
+  .presets button, .actionbtn{
+    background:var(--panel2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:6px 10px;
+    border-radius:8px;
+    font-size:.78rem;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .presets button:hover, .actionbtn:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+
+  .stats{
+    display:grid; grid-template-columns:1fr 1fr; gap:8px;
+    margin-top:6px;
+  }
+  .stat{
+    background:var(--panel2); border:1px solid var(--border);
+    border-radius:10px; padding:8px 10px;
+  }
+  .stat .lbl{font-size:.72rem; color:var(--muted); margin-bottom:2px;}
+  .stat .v{font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:.95rem;}
+  .regime{
+    margin-top:10px; padding:10px 12px; border-radius:10px;
+    font-weight:600; font-size:.92rem; text-align:center;
+    border:1px solid var(--border);
+  }
+  .regime.regular{background:rgba(79,209,123,.12); color:var(--good); border-color:rgba(79,209,123,.35);}
+  .regime.periodic{background:rgba(243,196,75,.12); color:var(--warn); border-color:rgba(243,196,75,.35);}
+  .regime.chaotic{background:rgba(255,91,110,.12); color:var(--bad); border-color:rgba(255,91,110,.35);}
+  .regime.diverging{background:rgba(255,91,110,.2); color:#fff; border-color:var(--bad);}
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:18px;
+  }
+  @media (max-width: 1300px){
+    .grid{grid-template-columns: 1fr;}
+  }
+  .chart-wrap{height:300px; position:relative;}
+  .chart-wrap.tall{height:360px;}
+  .full{grid-column: 1 / -1;}
+  .note{font-size:.78rem; color:var(--muted); margin:6px 0 0;}
+  .row-actions{display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap;}
+  footer{
+    text-align:center; color:var(--muted); font-size:.78rem;
+    padding:18px; border-top:1px solid var(--border);
+  }
+  a{color:var(--accent);}
+</style>
+</head>
+<body>
+<header>
+  <h1>Chaos Control and Schedule of Shuttle Buses — Interactive Reproduction</h1>
+  <p>T. Nagatani, <i>Physica A</i> 371 (2006) 683–691. Dimensionless nonlinear map (Eq. 5), reproduced live in your browser — same event-driven model as <code>src/nagatani/simulation.py</code> and <code>reimplement.ipynb</code>.</p>
+  <div class="formula">
+    T<sub>i</sub>(m+1) = T<sub>i</sub>(m) + &Gamma; &middot; H<sub>i</sub>(m) + 1 / (1 + S<sub>i</sub> &middot; H<sub>i</sub>(m)),
+    &nbsp;&nbsp; H<sub>i</sub>(m) = T<sub>i</sub>(m) &minus; T<sub>i'</sub>(m')
+  </div>
+</header>
+
+<main>
+  <!-- ===================== CONTROLS ===================== -->
+  <div class="panel controls">
+    <h2><span class="dot"></span>Parameters</h2>
+
+    <div class="slider-row">
+      <label><b>&Gamma;</b> (loading parameter) <span class="val" id="vG">0.500</span></label>
+      <input type="range" id="G" min="0" max="2" step="0.001" value="0.5">
+    </div>
+    <div class="slider-row">
+      <label><b>S<sub>1</sub></b> (speedup bus 1) <span class="val" id="vS1">0.50</span></label>
+      <input type="range" id="S1" min="0" max="2.5" step="0.01" value="0.5">
+    </div>
+    <div class="slider-row">
+      <label><b>S<sub>2</sub></b> (speedup bus 2) <span class="val" id="vS2">0.20</span></label>
+      <input type="range" id="S2" min="0" max="2.5" step="0.01" value="0.2">
+    </div>
+    <div class="slider-row">
+      <label>Recorded trips <span class="val" id="vN">150</span></label>
+      <input type="range" id="numTrips" min="50" max="400" step="10" value="150">
+    </div>
+    <div class="slider-row">
+      <label>Transient (discarded) <span class="val" id="vD">1000</span></label>
+      <input type="range" id="discard" min="0" max="2000" step="50" value="1000">
+    </div>
+
+    <h2 style="margin-top:18px;"><span class="dot" style="background:var(--accent2)"></span>Presets (paper figures)</h2>
+    <div class="presets">
+      <button data-preset="0,0,0.5">Fig.2(a) S=0,0</button>
+      <button data-preset="0.2,0.2,0.5">Fig.2(b) S=0.2,0.2</button>
+      <button data-preset="0.3,0.2,0.5">Fig.2(c) S=0.3,0.2</button>
+      <button data-preset="0.5,0.2,0.5">Fig.2(d) S=0.5,0.2</button>
+      <button data-preset="0.5,0.2,0.05">Regular (&Gamma;=0.05)</button>
+      <button data-preset="0.5,0.2,0.3">Periodic (&Gamma;=0.3)</button>
+      <button data-preset="0.5,0.2,0.8">Chaotic (&Gamma;=0.8)</button>
+      <button data-preset="0.5,0.2,2.0">Divergence (&Gamma;=2)</button>
+    </div>
+
+    <h2><span class="dot" style="background:var(--good)"></span>Steady-state statistics</h2>
+    <div class="stats">
+      <div class="stat"><div class="lbl">Mean H&#8321; (H<sub>1a</sub>)</div><div class="v" id="meanH1">-</div></div>
+      <div class="stat"><div class="lbl">Mean H&#8322; (H<sub>2a</sub>)</div><div class="v" id="meanH2">-</div></div>
+      <div class="stat"><div class="lbl">Mean &Delta;T&#8321;</div><div class="v" id="meanT1">-</div></div>
+      <div class="stat"><div class="lbl">Mean &Delta;T&#8322;</div><div class="v" id="meanT2">-</div></div>
+      <div class="stat"><div class="lbl">RMS H&#8321; (H<sub>1v</sub>)</div><div class="v" id="rmsH1">-</div></div>
+      <div class="stat"><div class="lbl">RMS H&#8322; (H<sub>2v</sub>)</div><div class="v" id="rmsH2">-</div></div>
+    </div>
+    <div class="regime" id="regime">—</div>
+    <p class="note">Regime classification is a quick heuristic (RMS of tour time of bus 1), for intuition only — see Fig. 8 for the paper's actual phase diagram.</p>
+  </div>
+
+  <!-- ===================== CHARTS ===================== -->
+  <div class="grid">
+
+    <div class="panel">
+      <h2><span class="dot"></span>Time headway H<sub>i</sub>(m)</h2>
+      <div class="chart-wrap"><canvas id="headwayChart"></canvas></div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>Tour time &Delta;T<sub>i</sub>(m)</h2>
+      <div class="chart-wrap"><canvas id="tourChart"></canvas></div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>Return map: H<sub>1</sub>(m+1) vs H<sub>1</sub>(m)</h2>
+      <div class="chart-wrap"><canvas id="returnMapChart"></canvas></div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>Headway histogram (bus 1)</h2>
+      <div class="chart-wrap"><canvas id="histChart"></canvas></div>
+    </div>
+
+    <div class="panel full">
+      <h2><span class="dot" style="background:var(--accent2)"></span>Bifurcation diagram — H<sub>1</sub>(m) vs &Gamma; (current S<sub>1</sub>, S<sub>2</sub>)</h2>
+      <div class="row-actions">
+        <button class="actionbtn" id="runBifurcation">Generate (≈1–2s)</button>
+        <span class="note" id="bifNote">Sweeps &Gamma; &isin; [0, 2] with the current S<sub>1</sub>, S<sub>2</sub> — reproduces Fig. 2 for the chosen speedups.</span>
+      </div>
+      <div class="chart-wrap tall"><canvas id="bifChart"></canvas></div>
+    </div>
+
+    <div class="panel full">
+      <h2><span class="dot" style="background:var(--good)"></span>Phase diagram (Fig. 8) — transition &Gamma;* vs S (S<sub>1</sub>=S<sub>2</sub>=S)</h2>
+      <div class="row-actions">
+        <button class="actionbtn" id="runPhase">Generate (≈1–2s)</button>
+        <span class="note">Regular motion above/left of the curve, periodic/chaotic below/right — matches &Gamma;*&nbsp;=&nbsp;S/(S+1).</span>
+      </div>
+      <div class="chart-wrap tall"><canvas id="phaseChart"></canvas></div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  Built for the MathModelling 2025.2 reproduction project · simulator mirrors <code>src/nagatani/simulation.py</code> (event-driven heap on the dimensionless map, Eq. 5)
+</footer>
+
+<script>
+/* ===================== Core simulator (M = 2) ===================== */
+// Mirrors src/nagatani/simulation.py / reimplement.ipynb cell 4.
+function simulate(G, S1, S2, numTrips, discard) {
+  const S = [S1, S2];
+  let nextT = [0.0, 0.5];
+  let nextTrip = [0, 0];
+  let lastArrival = -0.5;
+  const h = [[], []];
+  const tour = [[], []];
+
+  // total events: each bus popped numTrips times
+  const totalEvents = 2 * numTrips;
+  for (let step = 0; step < totalEvents; step++) {
+    const bus = nextT[0] <= nextT[1] ? 0 : 1;
+    const currentTime = nextT[bus];
+    const tripId = nextTrip[bus];
+    if (tripId >= numTrips) break;
+
+    const headway = currentTime - lastArrival;
+    lastArrival = currentTime;
+
+    const denom = 1 + S[bus] * headway;
+    const tourTime = G * headway + 1 / denom;
+    const next = currentTime + tourTime;
+
+    if (tripId >= discard) {
+      h[bus].push(headway);
+      tour[bus].push(tourTime);
+    }
+    nextT[bus] = next;
+    nextTrip[bus] = tripId + 1;
+  }
+  return { h0: h[0], h1: h[1], tour0: tour[0], tour1: tour[1] };
+}
+
+function mean(arr) {
+  if (!arr.length) return NaN;
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+function rms(arr) {
+  if (!arr.length) return NaN;
+  const m = mean(arr);
+  return Math.sqrt(mean(arr.map(x => (x - m) ** 2)));
+}
+function fmt(x) {
+  if (!isFinite(x)) return "diverges";
+  if (isNaN(x)) return "-";
+  return x.toFixed(4);
+}
+
+/* ===================== Chart setup ===================== */
+Chart.defaults.color = "#9aa3b2";
+Chart.defaults.borderColor = "#2a2f3a";
+Chart.defaults.font.family = "Segoe UI, system-ui, sans-serif";
+
+const BLACK = "#e6e8ec";
+const BLUE = "#5b9dff";
+
+function baseLineOpts(yLabel) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    animation: false,
+    elements: { point: { radius: 0 }, line: { borderWidth: 1.4 } },
+    scales: {
+      x: { title: { display: true, text: "trip m (after transient)" }, grid: { color: "#222730" } },
+      y: { title: { display: true, text: yLabel }, grid: { color: "#222730" } }
+    },
+    plugins: { legend: { labels: { boxWidth: 14 } } }
+  };
+}
+
+const headwayChart = new Chart(document.getElementById('headwayChart'), {
+  type: 'line',
+  data: { datasets: [
+    { label: 'H₁(m)', data: [], borderColor: BLACK, backgroundColor: BLACK },
+    { label: 'H₂(m)', data: [], borderColor: BLUE, backgroundColor: BLUE }
+  ]},
+  options: baseLineOpts("Headway H")
+});
+
+const tourChart = new Chart(document.getElementById('tourChart'), {
+  type: 'line',
+  data: { datasets: [
+    { label: 'ΔT₁(m)', data: [], borderColor: BLACK, backgroundColor: BLACK },
+    { label: 'ΔT₂(m)', data: [], borderColor: BLUE, backgroundColor: BLUE }
+  ]},
+  options: baseLineOpts("Tour time ΔT")
+});
+
+const returnMapChart = new Chart(document.getElementById('returnMapChart'), {
+  type: 'scatter',
+  data: { datasets: [
+    { label: 'H₁(m+1) vs H₁(m)', data: [], backgroundColor: BLACK, pointRadius: 2.5 },
+    { label: 'y = x', data: [], type: 'line', borderColor: '#555b6a', borderWidth: 1, pointRadius: 0, borderDash: [4,4] }
+  ]},
+  options: {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    scales: {
+      x: { title: { display: true, text: "H₁(m)" }, min: 0, grid: { color: "#222730" } },
+      y: { title: { display: true, text: "H₁(m+1)" }, min: 0, grid: { color: "#222730" } }
+    },
+    plugins: { legend: { labels: { boxWidth: 14 } } }
+  }
+});
+
+const histChart = new Chart(document.getElementById('histChart'), {
+  type: 'bar',
+  data: { labels: [], datasets: [
+    { label: 'H₁ distribution', data: [], backgroundColor: 'rgba(91,157,255,0.55)', borderColor: BLUE, borderWidth: 1 }
+  ]},
+  options: {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    scales: {
+      x: { title: { display: true, text: "Headway H₁ bin" }, grid: { display: false } },
+      y: { title: { display: true, text: "count" }, grid: { color: "#222730" } }
+    },
+    plugins: { legend: { display: false } }
+  }
+});
+
+const bifChart = new Chart(document.getElementById('bifChart'), {
+  type: 'scatter',
+  data: { datasets: [
+    { label: 'H₁(m), m sufficiently large', data: [], backgroundColor: 'rgba(230,232,236,0.5)', pointRadius: 1 },
+    { label: 'current Γ', data: [], backgroundColor: '#ff8a5b', pointRadius: 0, type: 'line', borderColor:'#ff8a5b', borderWidth: 2 }
+  ]},
+  options: {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    scales: {
+      x: { title: { display: true, text: "Γ (loading parameter)" }, min: 0, max: 2, grid: { color: "#222730" } },
+      y: { title: { display: true, text: "Headway of bus 1" }, min: 0, max: 6, grid: { color: "#222730" } }
+    },
+    plugins: { legend: { labels: { boxWidth: 14 } } }
+  }
+});
+
+const phaseChart = new Chart(document.getElementById('phaseChart'), {
+  type: 'scatter',
+  data: { datasets: [
+    { label: 'Transition Γ*(S)', data: [], backgroundColor: 'transparent', borderColor: '#4fd17b', pointStyle: 'circle', pointRadius: 4, borderWidth: 1.5, showLine: false },
+    { label: 'current (Γ, S₁)', data: [], backgroundColor: '#ff8a5b', pointRadius: 6, pointStyle: 'star' }
+  ]},
+  options: {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    scales: {
+      x: { title: { display: true, text: "Loading parameter Γ" }, min: 0, max: 1, grid: { color: "#222730" } },
+      y: { title: { display: true, text: "S" }, min: 0, max: 5.2, grid: { color: "#222730" } }
+    },
+    plugins: { legend: { labels: { boxWidth: 14 } } }
+  }
+});
+
+/* ===================== Wiring / UI ===================== */
+const els = {
+  G: document.getElementById('G'),
+  S1: document.getElementById('S1'),
+  S2: document.getElementById('S2'),
+  numTrips: document.getElementById('numTrips'),
+  discard: document.getElementById('discard'),
+};
+const vals = {
+  G: document.getElementById('vG'),
+  S1: document.getElementById('vS1'),
+  S2: document.getElementById('vS2'),
+  numTrips: document.getElementById('vN'),
+  discard: document.getElementById('vD'),
+};
+
+function readParams() {
+  return {
+    G: parseFloat(els.G.value),
+    S1: parseFloat(els.S1.value),
+    S2: parseFloat(els.S2.value),
+    numTrips: parseInt(els.numTrips.value),
+    discard: parseInt(els.discard.value),
+  };
+}
+
+function updateLabels(p) {
+  vals.G.textContent = p.G.toFixed(3);
+  vals.S1.textContent = p.S1.toFixed(2);
+  vals.S2.textContent = p.S2.toFixed(2);
+  vals.numTrips.textContent = p.numTrips;
+  vals.discard.textContent = p.discard;
+}
+
+function update() {
+  const p = readParams();
+  updateLabels(p);
+
+  const res = simulate(p.G, p.S1, p.S2, p.discard + p.numTrips, p.discard);
+
+  // time series
+  const idx = res.h0.map((_, i) => i);
+  headwayChart.data.datasets[0].data = idx.map(i => ({x: i, y: res.h0[i]}));
+  headwayChart.data.datasets[1].data = res.h1.map((y,i) => ({x: i, y}));
+  headwayChart.update();
+
+  tourChart.data.datasets[0].data = res.tour0.map((y,i) => {
+    return {x: i, y: isFinite(y) ? y : null};
+  });
+  tourChart.data.datasets[1].data = res.tour1.map((y,i) => {
+    return {x: i, y: isFinite(y) ? y : null};
+  });
+  tourChart.update();
+
+  // return map
+  const h1 = res.h0.filter(v => isFinite(v));
+  const pts = [];
+  for (let i = 0; i < h1.length - 1; i++) pts.push({x: h1[i], y: h1[i+1]});
+  const maxH = Math.max(1.5, ...h1, 0);
+  returnMapChart.data.datasets[0].data = pts;
+  returnMapChart.data.datasets[1].data = [{x:0,y:0},{x:maxH,y:maxH}];
+  returnMapChart.options.scales.x.max = maxH;
+  returnMapChart.options.scales.y.max = maxH;
+  returnMapChart.update();
+
+  // histogram
+  if (h1.length) {
+    const nbins = 30;
+    const hmax = Math.max(...h1);
+    const hmin = Math.min(...h1);
+    const width = (hmax - hmin) / nbins || 1;
+    const bins = new Array(nbins).fill(0);
+    h1.forEach(v => {
+      let b = Math.floor((v - hmin) / width);
+      if (b >= nbins) b = nbins - 1;
+      if (b < 0) b = 0;
+      bins[b]++;
+    });
+    histChart.data.labels = bins.map((_, i) => (hmin + (i+0.5)*width).toFixed(2));
+    histChart.data.datasets[0].data = bins;
+  } else {
+    histChart.data.labels = [];
+    histChart.data.datasets[0].data = [];
+  }
+  histChart.update();
+
+  // stats
+  const m1 = mean(res.h0), m2 = mean(res.h1);
+  const t1 = mean(res.tour0.filter(isFinite)), t2 = mean(res.tour1.filter(isFinite));
+  const r1 = rms(res.h0), r2 = rms(res.h1);
+  document.getElementById('meanH1').textContent = fmt(m1);
+  document.getElementById('meanH2').textContent = fmt(m2);
+  document.getElementById('meanT1').textContent = fmt(t1);
+  document.getElementById('meanT2').textContent = fmt(t2);
+  document.getElementById('rmsH1').textContent = fmt(r1);
+  document.getElementById('rmsH2').textContent = fmt(r2);
+
+  const regimeEl = document.getElementById('regime');
+  const rt1 = rms(res.tour0.filter(isFinite));
+  let regime, cls;
+  if (p.G >= 2 || !isFinite(m1) || Math.abs(m1) > 1e6) {
+    regime = "Diverging (Γ ≥ 2)"; cls = "diverging";
+  } else if (rt1 < 1e-6) {
+    regime = "Regular motion (period-1)"; cls = "regular";
+  } else if (rt1 < 0.05) {
+    regime = "Periodic motion"; cls = "periodic";
+  } else {
+    regime = "Chaotic / strongly fluctuating"; cls = "chaotic";
+  }
+  regimeEl.textContent = regime;
+  regimeEl.className = "regime " + cls;
+
+  // marker on bifurcation chart for current Γ
+  bifChart.data.datasets[1].data = [{x: p.G, y: 0}, {x: p.G, y: 6}];
+  bifChart.update();
+
+  // marker on phase diagram for current (Γ, S1)
+  phaseChart.data.datasets[1].data = [{x: Math.min(p.G,1), y: p.S1}];
+  phaseChart.update();
+}
+
+let debounceTimer;
+function onInput() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(update, 30);
+}
+Object.values(els).forEach(el => el.addEventListener('input', onInput));
+
+/* ----- presets ----- */
+document.querySelectorAll('.presets button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const [s1, s2, g] = btn.dataset.preset.split(',').map(Number);
+    els.S1.value = s1; els.S2.value = s2; els.G.value = g;
+    update();
+  });
+});
+
+/* ----- bifurcation diagram (on demand) ----- */
+document.getElementById('runBifurcation').addEventListener('click', () => {
+  const btn = document.getElementById('runBifurcation');
+  btn.disabled = true; btn.textContent = "Computing...";
+  setTimeout(() => {
+    const p = readParams();
+    const nG = 220;
+    const pts = [];
+    for (let i = 0; i < nG; i++) {
+      const G = 0.005 + (1.995 * i) / (nG - 1);
+      const res = simulate(G, p.S1, p.S2, 300, 100); // shorter run for speed
+      res.h0.forEach(v => { if (isFinite(v)) pts.push({x: G, y: v}); });
+    }
+    bifChart.data.datasets[0].data = pts;
+    bifChart.update();
+    btn.disabled = false; btn.textContent = "Generate (≈1–2s)";
+  }, 10);
+});
+
+/* ----- phase diagram (on demand) ----- */
+document.getElementById('runPhase').addEventListener('click', () => {
+  const btn = document.getElementById('runPhase');
+  btn.disabled = true; btn.textContent = "Computing...";
+  setTimeout(() => {
+    const valid_s = [];
+    const nS = 40;
+    for (let i = 0; i < nS; i++) valid_s.push(0.05 + (4.95 * i) / (nS - 1));
+    const pts = [];
+    valid_s.forEach(s => {
+      let lo = 0.01, hi = 1.0;
+      for (let it = 0; it < 12; it++) {
+        const mid = (lo + hi) / 2;
+        const res = simulate(mid, s, s, 1200, 1000);
+        const r = rms(res.h0);
+        if (r > 0.015) hi = mid; else lo = mid;
+      }
+      pts.push({x: (lo + hi) / 2, y: s});
+    });
+    phaseChart.data.datasets[0].data = pts;
+    phaseChart.update();
+    btn.disabled = false; btn.textContent = "Generate (≈1–2s)";
+  }, 10);
+});
+
+/* initial render */
+update();
+</script>
+</body>
+</html>

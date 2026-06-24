@@ -1,0 +1,347 @@
+\documentclass[t, aspectratio=169]{beamer}
+\usepackage[utf8]{vietnam}
+\usepackage{amsthm,amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{booktabs}
+
+% --- MARGIN CONFIG ---
+\def\slideContentLeftMargin{0.5cm}
+\def\slideContentRightMargin{1cm}
+\def\hustHeaderHeight{1cm}
+\def\slideContentBotMargin{3.5cm}
+
+\usepackage[blue, 169]{beamerthemeHUST}
+\graphicspath{{hust_theme/images/}{figures/}}
+
+\renewcommand{\titlePageTitleX}{-0.5cm}
+\renewcommand{\titlePageTitleY}{-0.5cm}
+\renewcommand{\hustTitleAlign}{\alignLeft}
+\renewcommand{\hustSubtitleAlign}{\alignLeft}
+\renewcommand{\hustAuthorAlign}{\alignLeft}
+\renewcommand{\hustInstAlign}{\alignLeft}
+
+\title{Chaos Control And Schedule Of Shuttle Buses}
+\subtitle{Takashi Nagatani, 2006}
+\author{Tran Quang Hung -- 20235502 \\ Le Gia Huy -- 20225498 \\ Nguyen Hoang Son Tung -- 20225536}
+\institute{Supervisor: PhD. Bui Quoc Trung \\ Mathematical Modelling -- Hanoi University of Science and Technology}
+
+\begin{document}
+
+\hustintropage{}
+
+\husttitlepage
+
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+
+\resetPageCount
+\showPageNumber
+\useStyleHustFull
+\useThinBar
+
+% =====================================================================
+\section{Motivation}
+% =====================================================================
+
+\begin{frame}{Motivation: The Bus Bunching Problem}
+	\begin{columns}[T]
+		\begin{column}{0.52\textwidth}
+			\small
+			\textbf{A familiar phenomenon:}
+			\begin{itemize}
+				\item Shuttle buses run back and forth between two terminals with no fixed timetable.
+				\item Trip duration depends on \textbf{passengers picked up}, which depends on the \textbf{headway} since the previous bus.
+			\end{itemize}
+
+			\vspace{0.3em}
+			\textbf{The feedback loop $\to$ chaos:}
+			\begin{enumerate}
+				\item Bus falls behind $\Rightarrow$ more passengers $\Rightarrow$ longer boarding $\Rightarrow$ falls \emph{further} behind.
+				\item Next bus finds fewer passengers, speeds up.
+				\item Gaps amplify every round $\Rightarrow$ \textbf{deterministic chaos}.
+			\end{enumerate}
+		\end{column}
+		\begin{column}{0.46\textwidth}
+			\centering
+			\includegraphics[width=\textwidth,height=5.5cm,keepaspectratio]{fig1_schematic.png}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+% =====================================================================
+\section{The Model}
+% =====================================================================
+
+\begin{frame}{The Model: Setup and Notation}
+	\small
+	\begin{columns}[T]
+		\begin{column}{0.48\textwidth}
+			\textbf{System:} $M$ buses shuttle between Origin and Destination. Passengers board at Origin, alight at Destination.
+
+			\vspace{0.5em}
+			\textbf{Key assumptions:}
+			\begin{itemize}
+				\item Passengers arrive at rate $\mu$ (constant).
+				\item Each boarding takes $\gamma$, each alighting takes $\eta$ seconds.
+				\item Buses can \emph{overtake} each other.
+				\item A delayed bus can \emph{speed up} to compensate.
+			\end{itemize}
+		\end{column}
+		\begin{column}{0.50\textwidth}
+			\textbf{Notation:}
+
+			\vspace{0.3em}
+			\begin{tabular}{@{}cl@{}}
+				\toprule
+				Symbol & Meaning \\
+				\midrule
+				$M$        & number of buses \\
+				$t_i(m)$   & arrival time of bus $i$, trip $m$ \\
+				$B_i(m)$   & passengers boarding bus $i$ \\
+				$V_i(m)$   & average speed of bus $i$ \\
+				$\mu$      & passenger arrival rate \\
+				$\gamma,\eta$ & board / alight time per pax \\
+				$L$        & one-way route length \\
+				$V_0$      & base speed (no speedup) \\
+				$s_i$      & speedup coefficient of bus $i$ \\
+				\bottomrule
+			\end{tabular}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{The Model: Arrival Time Equation (Eq.~1)}
+	A bus trip has three phases: \textbf{arrive} at Origin, \textbf{board/alight} passengers, \textbf{drive} the round trip. So the \emph{next} arrival time is:
+
+	\begin{equation}
+		\boxed{\;t_i(m+1) = \underbrace{t_i(m)}_{\text{current time}}
+		+ \underbrace{(\gamma + \eta)\,B_i(m)}_{\text{dwell time}}
+		+ \underbrace{\frac{2L}{V_i(m)}}_{\text{travel time}}\;}
+		\tag{Eq.\,1}
+	\end{equation}
+
+	\vspace{0.5em}
+	\begin{itemize}
+		\item $(\gamma+\eta)\,B_i(m)$: total time spent boarding and alighting passengers.
+		\item $\dfrac{2L}{V_i(m)}$: round-trip driving time at average speed $V_i(m)$.
+	\end{itemize}
+
+	\vspace{0.3em}
+	$\Rightarrow$ We need expressions for $B_i(m)$ and $V_i(m)$ to close this equation.
+\end{frame}
+
+\begin{frame}{The Model: Passengers and Speedup (Eq.~2--3)}
+	\textbf{Eq.~2 -- Passengers boarding:} proportional to the headway (time since last bus).
+	\begin{equation}
+		B_i(m) = \mu\,\big(t_i(m) - t_{i'}(m')\big) \equiv \mu\, h_i(m)
+		\tag{Eq.\,2}
+	\end{equation}
+	where $i'$ is whichever bus arrived just before bus $i$, and $h_i(m)$ is the \textbf{headway}.
+
+	\vspace{0.8em}
+	\textbf{Eq.~3 -- Speedup control:} a bus with more passengers drives faster to compensate.
+	\begin{equation}
+		V_i(m) = V_0 + s_i\,(\gamma+\eta)\,B_i(m)
+		\tag{Eq.\,3}
+	\end{equation}
+
+	\begin{itemize}
+		\item $s_i = 0$: no compensation -- speed is always $V_0$.
+		\item $s_i$ large: heavy speedup -- the bus tries hard to catch up.
+	\end{itemize}
+
+	\vspace{0.3em}
+	\alert{Two competing effects:} large headway $\to$ more passengers $\to$ \emph{longer dwell} but also \emph{faster driving}.
+\end{frame}
+
+\begin{frame}{The Model: Combined Raw Equation (Eq.~4)}
+	Substituting Eq.~2 and Eq.~3 into Eq.~1:
+	\begin{equation}
+		t_i(m+1) = t_i(m) + \mu(\gamma+\eta)\!\left(t_i(m)-t_{i'}(m')\right) + \frac{2L}{V_0 + s_i\,\mu(\gamma+\eta)\!\left(t_i(m)-t_{i'}(m')\right)}
+		\tag{Eq.\,4}
+	\end{equation}
+
+	\vspace{0.5em}
+	\textbf{Reading this equation:}
+	\begin{itemize}
+		\item \textbf{Dwell term} $\mu(\gamma+\eta)\,h$: grows linearly with headway $\to$ delays the bus.
+		\item \textbf{Travel term} $\frac{2L}{V_0 + s_i\mu(\gamma+\eta)\,h}$: \emph{decreases} with headway $\to$ speeds up the bus.
+	\end{itemize}
+
+	\vspace{0.3em}
+	$\Rightarrow$ This is a \textbf{nonlinear map}: the next arrival depends on the current headway through both a linear and a reciprocal term. This competition is the source of chaos.
+\end{frame}
+
+\begin{frame}{The Model: Dimensionless Map (Eq.~5)}
+	\textbf{Non-dimensionalise} by the free-running round-trip time $\tau_0 = 2L/V_0$:
+	\[
+		T_i \equiv \frac{t_i}{\tau_0}, \qquad
+		\Gamma \equiv \mu(\gamma+\eta), \qquad
+		S_i \equiv \frac{s_i\,\mu(\gamma+\eta)\cdot 2L}{V_0^2}
+	\]
+
+	\vspace{0.2em}
+	Defining the \textbf{headway} $H_i(m) \equiv T_i(m) - T_{i'}(m')$, we get:
+	\begin{equation}
+		\boxed{\;T_i(m+1) = T_i(m) + \Gamma \cdot H_i(m) + \frac{1}{1 + S_i \cdot H_i(m)}\;}
+		\tag{Eq.\,5}
+	\end{equation}
+
+	\begin{itemize}
+		\item $\Gamma$: \textbf{loading parameter} -- how strongly passengers slow the bus.
+		\item $S_i$: \textbf{speedup parameter} -- how aggressively bus $i$ compensates.
+		\item $H_i$: \textbf{headway} -- the time gap to the previous bus.
+	\end{itemize}
+
+	\vspace{0.2em}
+	The entire dynamics depend only on $\Gamma$ and $\{S_i\}$ -- all physical constants absorbed.
+\end{frame}
+
+
+% =====================================================================
+\section{Methodology}
+% =====================================================================
+
+\begin{frame}{Methodology: Simulation Procedure}
+	\textbf{Key subtlety:} buses can \emph{overtake} each other, so the ``preceding bus'' in $H_i(m)$ is \textbf{not fixed in advance} -- it depends on the dynamics itself.
+
+	\vspace{0.5em}
+	\textbf{Simulation:}
+	\begin{enumerate}
+		\item Maintain each bus's next arrival time on a priority queue.
+		\item Pop the earliest arrival -- that bus has just returned to Origin.
+		\item Compute its headway $H_i$ against whichever bus arrived most recently (not a pre-assigned partner).
+		\item Apply the nonlinear map (Eq.~5) to compute the next arrival time; push it back onto the queue.
+		\item Repeat for all trips; discard the first 900 (transient) and analyse trips 900--1000.
+	\end{enumerate}
+
+	\vspace{0.3em}
+\end{frame}
+
+% =====================================================================
+\section{Results: Time Series}
+% =====================================================================
+
+\begin{frame}{Time Series: Headway Dynamics}
+	\begin{columns}[T]
+		\begin{column}{0.5\textwidth}
+			\centering
+			\includegraphics[width=\textwidth]{fig2_time_headway.png}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\centering
+			\includegraphics[width=\textwidth]{fig3_zoom.png}
+		\end{column}
+	\end{columns}
+
+	\vspace{0.5em}
+	For small $\Gamma$, the headways quickly converge to a fixed value (\textbf{regular motion}). As $\Gamma$ increases past $\Gamma^*$, the headway begins to oscillate \textbf{periodically}, then \textbf{chaotically}.
+\end{frame}
+
+\begin{frame}{Time Series: Tour-Time Dynamics}
+	\begin{columns}[T]
+		\begin{column}{0.5\textwidth}
+			\centering
+			\includegraphics[width=\textwidth]{fig4_tour_time.png}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\centering
+			\includegraphics[width=\textwidth]{fig5_zoom.png}
+		\end{column}
+	\end{columns}
+
+	\vspace{0.5em}
+	Tour time mirrors headway through the map: once headway oscillates chaotically, the round-trip duration fluctuates irregularly -- directly undermining \textbf{schedule reliability}.
+\end{frame}
+
+% =====================================================================
+\useStyleLogoOnly
+\useThickBar
+\section{Results: Phase-Space Analysis}
+% =====================================================================
+
+\begin{frame}{Phase Space: Return Maps}
+	\begin{columns}[T]
+		\begin{column}{0.55\textwidth}
+			\centering
+			\includegraphics[width=0.85\textwidth]{fig6_return_map.png}
+		\end{column}
+		\begin{column}{0.45\textwidth}
+			\begin{block}{Reading the map}
+				\begin{itemize}
+					\item \textbf{$\Gamma = 0.2$}: periodic motion with period 11.
+					\item \textbf{$\Gamma = 0.3$}: piecewise map, chaotic motion with a single extended distribution.
+					\item \textbf{$\Gamma = 0.5$}: piecewise map, chaotic motion with two extended distributions.
+					\item \textbf{$\Gamma = 0.8$}: very complex piecewise map, multi-valued function, chaotic motion with a single extended distribution.
+				\end{itemize}
+			\end{block}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Phase Space: Mean and RMS Statistics}
+	\begin{columns}[T]
+		\begin{column}{0.55\textwidth}
+			\centering
+			\includegraphics[width=0.95\textwidth]{fig7_mean_rms.png}
+		\end{column}
+		\begin{column}{0.45\textwidth}
+			\begin{block}{Reading the curves}
+				\begin{itemize}
+					\item \textbf{RMS $\approx 0$}: for small $\Gamma$ -- headway converges to a constant (regular).
+					\item \textbf{RMS jumps sharply}: at $\Gamma=\Gamma^*$ -- the onset of periodic/chaotic oscillation.
+					\item \textbf{Mean tour time} grows quickly as $\Gamma \to 2$, foreshadowing collapse.
+				\end{itemize}
+			\end{block}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Phase Space: The Phase Diagram}
+	\begin{columns}[T]
+		\begin{column}{0.55\textwidth}
+			\centering
+			\includegraphics[width=0.95\textwidth]{fig8_phase_diagram.png}
+		\end{column}
+		\begin{column}{0.45\textwidth}
+			\begin{block}{Two regimes}
+				For the symmetric case $S_1=S_2=S$, there exists a critical loading $\Gamma^*(S)$ separating \textbf{regular motion} (below) from \textbf{periodic or chaotic motion} (above).
+			\end{block}
+			\begin{itemize}
+				\item No closed-form expression for $\Gamma^*(S)$ exists.
+				\item The boundary is \textbf{determined numerically} by bisection search (diamonds in figure).
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+% =====================================================================
+\useStyleHustFull
+\useThinBar
+\section{Interactive Demo}
+% =====================================================================
+
+\begin{frame}{Interactive Demo: Live Chaos Simulator}
+	\begin{columns}[T]
+		\begin{column}{0.55\textwidth}
+			\centering
+			\includegraphics[width=\textwidth,height=0.72\textheight,keepaspectratio]{demo_screenshot.png}
+		\end{column}
+		\begin{column}{0.43\textwidth}
+			\small
+			\textbf{What you can do:}
+			\begin{itemize}
+				\item Set $\Gamma$, $S_1$, $S_2$ and watch chaos unfold step-by-step.
+				\item Buses animate around the track in real time, pausing to board at the Origin and alight at the Destination.
+				\item Return-map plots update live.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+% =====================================================================
+
+\hustthankyou
+
+\end{document}

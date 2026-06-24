@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Shuttle Bus Chaos Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff;--card:#f7f8fa;--border:#dde3ec;--border2:#c3ccda;
+  --ink:#0b1b34;--ink2:#3a4a66;--muted:#6b7891;
+  --blue:#3253dc;--blue-bg:rgba(50,83,220,.08);
+  --bus1:#3b82f6;--bus1-bg:rgba(59,130,246,.1);
+  --bus2:#ef4444;--bus2-bg:rgba(239,68,68,.1);
+  --green:#16a34a;--orange:#ea580c;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --radius:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:14px;line-height:1.5}
+body{max-width:1400px;margin:0 auto;padding:20px 24px 40px}
+
+.hdr{display:flex;align-items:baseline;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.hdr h1{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.hdr .sub{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+
+.top-row{display:grid;grid-template-columns:280px 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.top-row{grid-template-columns:1fr}}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.card-title{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-weight:500}
+
+.param-group{margin-bottom:14px}
+.param-group label{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;font-weight:500}
+.param-group label .sym{font-family:var(--mono);color:var(--blue);font-weight:600;min-width:32px}
+.param-group input[type=number]{width:80px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;font-family:var(--mono);font-size:13px;text-align:right;background:#fff}
+.param-group input[type=number]:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-bg)}
+.param-row{display:flex;gap:10px;flex-wrap:wrap}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 16px;border:1px solid var(--border2);border-radius:6px;background:#fff;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;color:var(--ink)}
+.btn:hover{background:var(--card);border-color:var(--ink2)}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:#2845c0;border-color:#2845c0}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-icon{padding:5px 8px;font-size:16px;min-width:36px}
+
+.track-wrap{position:relative}
+#trackCanvas{width:100%;height:320px;display:block;border-radius:8px}
+
+.state-bar{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:13px}
+.state-item{display:flex;align-items:center;gap:6px}
+.state-item .label{color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.04em}
+.state-item .val{font-family:var(--mono);font-weight:600}
+.regime-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em}
+.regime-regular{background:rgba(22,163,74,.12);color:var(--green)}
+.regime-chaotic{background:rgba(239,68,68,.15);color:var(--bus2)}
+.regime-diverged{background:rgba(0,0,0,.1);color:var(--ink)}
+
+.formula-box{margin-top:12px;padding:14px 18px;background:#fff;border:1px solid var(--border);border-radius:8px;font-family:var(--mono);font-size:13px;line-height:2;overflow-x:auto;white-space:nowrap}
+.formula-box .f-line{white-space:nowrap}
+.f-bus1{color:var(--bus1);font-weight:600}
+.f-bus2{color:var(--bus2);font-weight:600}
+.f-param{color:var(--blue);font-weight:500}
+.f-result{font-weight:700;color:var(--ink)}
+.f-op{color:var(--muted)}
+.f-dim{color:var(--muted);font-size:12px}
+
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.controls .sep{width:1px;height:24px;background:var(--border)}
+.speed-wrap{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.speed-wrap input[type=range]{width:100px;accent-color:var(--blue)}
+.speed-wrap .speed-val{font-family:var(--mono);font-weight:600;color:var(--ink);min-width:50px}
+
+.progress-wrap{width:100%;height:6px;background:var(--card);border-radius:3px;margin:8px 0;cursor:pointer;position:relative}
+.progress-fill{height:100%;border-radius:3px;background:var(--blue);transition:width .1s}
+.progress-transient{position:absolute;top:0;left:0;height:100%;background:repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 6px);border-radius:3px;pointer-events:none}
+
+.settings{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.chk-label{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);cursor:pointer}
+.chk-label input{accent-color:var(--blue)}
+
+.graphs{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:16px}
+@media(max-width:600px){.graphs{grid-template-columns:1fr}}
+.graph-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.graph-card canvas{width:100%;height:220px;display:block;border-radius:6px;background:#fff;border:1px solid var(--border)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:8px;font-size:13px;font-weight:500;color:#fff;background:var(--ink);opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>Shuttle Bus Chaos Simulator</h1>
+  <span class="sub">Nagatani (2006) &mdash; Interactive step-by-step visualization</span>
+</div>
+
+<div class="top-row">
+  <div class="card">
+    <div class="card-title">Parameters</div>
+    <div class="param-group">
+      <label><span class="sym">&Gamma;</span> Loading
+        <input type="number" id="pGamma" value="0.5" step="0.05" min="0" max="3">
+      </label>
+    </div>
+    <div class="param-group param-row">
+      <label><span class="sym" style="color:var(--bus1)">S&#8321;</span>
+        <input type="number" id="pS1" value="0.5" step="0.1" min="0" max="5">
+      </label>
+      <label><span class="sym" style="color:var(--bus2)">S&#8322;</span>
+        <input type="number" id="pS2" value="0.2" step="0.1" min="0" max="5">
+      </label>
+    </div>
+    <div class="param-group param-row">
+      <label><span class="sym">T&#8321;(0)</span>
+        <input type="number" id="pT1" value="0.0" step="0.1">
+      </label>
+      <label><span class="sym">T&#8322;(0)</span>
+        <input type="number" id="pT2" value="0.5" step="0.1">
+      </label>
+    </div>
+    <div class="param-group param-row">
+      <label><span class="sym">Trips</span>
+        <input type="number" id="pTrips" value="1000" step="100" min="1000" title="Total trips per bus (min 1000)">
+      </label>
+      <label><span class="sym">Plot</span>
+        <input type="number" id="pPlotLast" value="100" step="10" min="10" title="Plot last N trips on return map">
+      </label>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-primary" id="btnRun" onclick="runSim()">&#9654; Run</button>
+      <button class="btn" id="btnReset" onclick="resetSim()">Reset</button>
+    </div>
+    <div class="card-title" style="margin-top:18px">Settings</div>
+    <div class="settings" style="flex-direction:column;gap:8px">
+      <label class="chk-label"><input type="checkbox" id="optChaos"> Auto-pause on non-regular motion</label>
+      <label class="chk-label"><input type="checkbox" id="optDiverge"> Auto-pause on divergence</label>
+      <label class="chk-label"><input type="checkbox" id="optShowFormula" checked> Show formula</label>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-title">Bus Track Visualization</div>
+      <div class="track-wrap">
+        <canvas id="trackCanvas"></canvas>
+      </div>
+      <div class="state-bar" id="stateBar">
+        <div class="state-item"><span class="label">Step</span><span class="val" id="stStep">0 / 0</span></div>
+        <div class="state-item"><span class="label">Time</span><span class="val" id="stTime">0.000</span></div>
+        <div class="state-item"><span class="label" id="stHLabel">H</span><span class="val" id="stH">&mdash;</span></div>
+        <div class="state-item"><span class="label">&Delta;T</span><span class="val" id="stDT">&mdash;</span></div>
+        <div class="state-item"><span class="label" title="Proportional to Γ·H — not a real passenger count">~Demand</span><span class="val" id="stPax">&mdash;</span></div>
+        <div class="state-item"><span class="label" title="Proportional to elapsed time since last bus">~Waiting</span><span class="val" id="stWait">&mdash;</span></div>
+        <div class="state-item"><span class="label">RMS</span><span class="val" id="stRMS">&mdash;</span></div>
+        <div class="state-item"><span id="regimeBadge" class="regime-badge regime-regular">&mdash;</span></div>
+      </div>
+      <div class="formula-box" id="formulaBox" style="display:none"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-icon btn-sm" onclick="stepBy(-1)" title="Back 1 step">&#9664;</button>
+      <button class="btn btn-sm" id="btnPlayPause" onclick="togglePlay()" style="min-width:80px">&#9654; Play</button>
+      <button class="btn btn-icon btn-sm" onclick="stepBy(1)" title="Forward 1 step">&#9654;</button>
+      <div class="sep"></div>
+      <div class="speed-wrap">
+        <span>Speed</span>
+        <input type="range" id="speedSlider" min="0.1" max="20" step="0.1" value="1">
+        <input type="number" id="speedInput" value="1" min="0.1" max="20" step="0.1" style="width:52px;padding:4px 6px;border:1px solid var(--border2);border-radius:4px;font-family:var(--mono);font-size:12px;text-align:center">
+        <span style="color:var(--muted)" title="simulation time units per real second">T/s</span>
+      </div>
+    </div>
+    <div class="progress-wrap" id="progressWrap" onclick="seekProgress(event)">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      <div class="progress-transient" id="progressTrans" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="graphs">
+  <div class="graph-card">
+    <div class="card-title" style="color:var(--bus1)">Return Map &mdash; Bus 1</div>
+    <canvas id="gReturn1"></canvas>
+  </div>
+  <div class="graph-card">
+    <div class="card-title" style="color:var(--bus2)">Return Map &mdash; Bus 2</div>
+    <canvas id="gReturn2"></canvas>
+  </div>
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== STATE ===== */
+let events = [];
+let simParams = {};
+let currentStep = 0;
+let playing = false;
+let animId = null;
+let lastFrameT = 0;
+let fracStep = 0;
+let simClock = 0;
+let chaosDetected = false;
+let divergeDetected = false;
+
+/* ===== SIMULATION ENGINE ===== */
+function runSim() {
+  const G = +document.getElementById('pGamma').value;
+  const S1 = +document.getElementById('pS1').value;
+  const S2 = +document.getElementById('pS2').value;
+  const M = 2;
+  const totalTrips = Math.max(1000, +document.getElementById('pTrips').value || 1000);
+  const plotLast = Math.max(10, Math.min(totalTrips, +document.getElementById('pPlotLast').value || 100));
+  const transient = totalTrips - plotLast;
+  const numTrips = totalTrips;
+
+  const S = [S1];
+  for (let i = 1; i < M; i++) S.push(S2);
+  let initT;
+  if (M === 2) {
+    initT = [+document.getElementById('pT1').value, +document.getElementById('pT2').value];
+  } else {
+    initT = Array.from({length: M}, (_, i) => i / M);
+  }
+  simParams = { G, S1, S2, M, numTrips, transient, plotLast };
+
+  events = simulate(G, S, initT, numTrips);
+  currentStep = 0;
+  fracStep = 0;
+  playing = false;
+  chaosDetected = false;
+  divergeDetected = false;
+  document.getElementById('btnPlayPause').innerHTML = '&#9654; Play';
+  updateProgressTransient();
+  renderState();
+  renderGraphs();
+  renderTrack(0);
+  toast(`Simulation: ${events.length} events`);
+}
+
+function simulate(G, S, initT, numTrips) {
+  const M = S.length;
+  const evts = [];
+  const nextT = [...initT];
+  const nextTrip = new Array(M).fill(0);
+  const depT = [...initT];
+  const tourT = new Array(M).fill(0);
+  // Initialise lastArr so the first bus sees a realistic headway instead of
+  // the artifact H=0.  With M buses equally spaced, one period ≈ 1 (the
+  // dimensionless round-trip time), so the "previous" arrival before t_min
+  // is roughly t_max − 1 (the last bus from the previous virtual cycle).
+  const sorted = [...initT].sort((a, b) => a - b);
+  let lastArr = sorted[sorted.length - 1] - 1;
+  if (lastArr >= sorted[0]) lastArr = sorted[0] - 1 / M;
+  const busPax = new Array(M).fill(0);
+  const busDwellFrac = new Array(M).fill(0);
+
+  for (let step = 0; step < M * numTrips; step++) {
+    let bus = -1, minT = Infinity;
+    for (let b = 0; b < M; b++) {
+      if (nextTrip[b] < numTrips && nextT[b] < minT) { minT = nextT[b]; bus = b; }
+    }
+    if (bus < 0) break;
+
+    const t = nextT[bus];
+    const trip = nextTrip[bus];
+    const h = t - lastArr;
+    if (h < 0 || h > 1e8) break;
+    const dt = G * h + 1 / (1 + S[bus] * h);
+    const nextArrival = t + dt;
+    const passengers = Math.round(h * 10);
+    busPax[bus] = passengers;
+    const dwellTime = G * h;
+    const dwellFrac = dt > 0 ? dwellTime / dt : 0;
+
+    const bNextT = [...nextT]; bNextT[bus] = nextArrival;
+    const bTrip = [...nextTrip]; bTrip[bus] = trip + 1;
+    const bDepT = [...depT]; bDepT[bus] = t;
+    const bTourT = [...tourT]; bTourT[bus] = dt;
+    const bPax = [...busPax];
+    const bDwell = [...busDwellFrac]; bDwell[bus] = dwellFrac;
+
+    evts.push({
+      step, bus, trip, time: t, headway: h, tourTime: dt,
+      nextArrival, lastArrival: lastArr, passengers, busPax: bPax,
+      busNextT: bNextT, busTrip: bTrip, busDepT: bDepT, busTourT: bTourT,
+      busDwellFrac: bDwell,
+    });
+
+    lastArr = t;
+    nextT[bus] = nextArrival;
+    nextTrip[bus] = trip + 1;
+    depT[bus] = t;
+    tourT[bus] = dt;
+  }
+  return evts;
+}
+
+function resetSim() {
+  pause();
+  events = [];
+  currentStep = 0;
+  fracStep = 0;
+  chaosDetected = false;
+  divergeDetected = false;
+  clearCanvas('trackCanvas');
+  clearCanvas('gReturn1');
+  clearCanvas('gReturn2');
+  document.getElementById('stStep').textContent = '0 / 0';
+  document.getElementById('stTime').textContent = '0.000';
+  document.getElementById('stH').textContent = '—';
+  document.getElementById('stDT').textContent = '—';
+  document.getElementById('stPax').textContent = '—';
+  document.getElementById('stWait').textContent = '—';
+  document.getElementById('stRMS').textContent = '—';
+  document.getElementById('regimeBadge').textContent = '—';
+  document.getElementById('regimeBadge').className = 'regime-badge';
+  document.getElementById('formulaBox').style.display = 'none';
+  document.getElementById('progressFill').style.width = '0%';
+}
+
+/* ===== PLAYBACK ===== */
+function togglePlay() {
+  if (!events.length) return;
+  playing ? pause() : play();
+}
+
+function play() {
+  if (!events.length || currentStep >= events.length - 1) return;
+  playing = true;
+  document.getElementById('btnPlayPause').innerHTML = '&#9646;&#9646; Pause';
+  lastFrameT = performance.now();
+  const ev = events[currentStep], nextEv = events[currentStep + 1];
+  simClock = ev.time + fracStep * (nextEv.time - ev.time);
+  animLoop(lastFrameT);
+}
+
+function pause() {
+  playing = false;
+  document.getElementById('btnPlayPause').innerHTML = '&#9654; Play';
+  if (animId) { cancelAnimationFrame(animId); animId = null; }
+}
+
+function animLoop(ts) {
+  if (!playing) return;
+
+  // speed is in simulation-time units per real second, so the simulation clock
+  // advances uniformly in model time — buses keep a constant physical speed
+  // regardless of how bunched-up the arrival events happen to be.
+  const speed = +document.getElementById('speedSlider').value;
+  const dtReal = Math.min((ts - lastFrameT) / 1000, 0.1); // clamp tab-switch gaps
+  lastFrameT = ts;
+  simClock += dtReal * speed;
+
+  let needUpdate = false;
+  while (currentStep < events.length - 1 && simClock >= events[currentStep + 1].time) {
+    currentStep++;
+    needUpdate = true;
+  }
+
+  if (currentStep >= events.length - 1) {
+    fracStep = 0;
+    renderState();
+    renderGraphs();
+    renderTrack(0);
+    pause();
+    return;
+  }
+
+  if (needUpdate) {
+    renderState();
+    renderGraphs();
+    if (checkAutoPause()) {
+      fracStep = 0;
+      renderTrack(0);
+      return;
+    }
+  }
+
+  const ev = events[currentStep], nextEv = events[currentStep + 1];
+  const span = nextEv.time - ev.time;
+  fracStep = span > 0 ? (simClock - ev.time) / span : 1;
+  fracStep = Math.max(0, Math.min(1, fracStep));
+  renderTrack(fracStep);
+  animId = requestAnimationFrame(animLoop);
+}
+
+function stepBy(n) {
+  if (!events.length) return;
+  currentStep = Math.max(0, Math.min(currentStep + n, events.length - 1));
+  fracStep = 0;
+  renderState();
+  renderGraphs();
+  renderTrack(0);
+}
+
+function seekProgress(e) {
+  if (!events.length) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  currentStep = Math.max(0, Math.min(Math.round(pct * (events.length - 1)), events.length - 1));
+  fracStep = 0;
+  renderState();
+  renderGraphs();
+  renderTrack(0);
+}
+
+document.getElementById('speedSlider').addEventListener('input', e => {
+  document.getElementById('speedInput').value = e.target.value;
+});
+document.getElementById('speedInput').addEventListener('input', e => {
+  const v = Math.max(0.1, Math.min(20, +e.target.value || 1));
+  document.getElementById('speedSlider').value = v;
+});
+
+function checkAutoPause() {
+  if (!events.length) return false;
+  const ev = events[currentStep];
+  if (document.getElementById('optDiverge').checked && (ev.headway > 50 || ev.tourTime > 50)) {
+    if (!divergeDetected) { divergeDetected = true; toast('Auto-paused: divergence!'); }
+    pause();
+    return true;
+  }
+  if (document.getElementById('optChaos').checked && currentStep > 60) {
+    const rms = computeRMS(currentStep);
+    if (rms > 0.05 && !chaosDetected) {
+      chaosDetected = true;
+      toast('Auto-paused: non-regular motion (RMS=' + rms.toFixed(4) + ')');
+      pause();
+      return true;
+    }
+  }
+  return false;
+}
+
+function computeRMS(upTo) {
+  const win = 40;
+  const start = Math.max(0, upTo - win);
+  let maxRms = 0;
+  const M = simParams.M || 2;
+  for (let bus = 0; bus < M; bus++) {
+    let sum = 0, n = 0, mean = 0;
+    for (let i = start; i <= upTo; i++) {
+      if (events[i].bus !== bus) continue;
+      mean += events[i].headway; n++;
+    }
+    if (n < 3) continue;
+    mean /= n;
+    for (let i = start; i <= upTo; i++) {
+      if (events[i].bus !== bus) continue;
+      const d = events[i].headway - mean;
+      sum += d * d;
+    }
+    maxRms = Math.max(maxRms, Math.sqrt(sum / n));
+  }
+  return maxRms;
+}
+
+function getRegime(step) {
+  if (step < 10) return 'starting';
+  const ev = events[step];
+  if (ev.headway > 50 || ev.tourTime > 50) return 'diverged';
+  const rms = computeRMS(step);
+  if (rms < 0.005) return 'regular';
+  return 'non-regular';
+}
+
+/* ===== RENDER STATE (info bar + formula) ===== */
+function renderState() {
+  if (!events.length) return;
+  const ev = events[currentStep];
+  document.getElementById('stStep').textContent = `${currentStep} / ${events.length - 1}`;
+  document.getElementById('stTime').textContent = ev.time.toFixed(3);
+  const busLabel = `B${ev.bus + 1}`;
+  document.getElementById('stHLabel').textContent = `H(${busLabel})`;
+  document.getElementById('stH').textContent = ev.headway.toFixed(4);
+  document.getElementById('stDT').textContent = ev.tourTime.toFixed(4);
+  document.getElementById('stPax').textContent = ev.passengers;
+  const waiting = Math.round((ev.time - ev.lastArrival) * 10);
+  document.getElementById('stWait').textContent = waiting;
+  const rms = currentStep > 10 ? computeRMS(currentStep) : 0;
+  document.getElementById('stRMS').textContent = rms.toFixed(4);
+  const regime = getRegime(currentStep);
+  const badge = document.getElementById('regimeBadge');
+  badge.textContent = { starting:'Starting', regular:'Regular', 'non-regular':'Non-regular', diverged:'Diverged' }[regime] || regime;
+  badge.className = 'regime-badge regime-' + (regime === 'non-regular' ? 'chaotic' : regime);
+  document.getElementById('progressFill').style.width = (currentStep / (events.length - 1) * 100) + '%';
+  if (document.getElementById('optShowFormula').checked) {
+    renderFormula(ev);
+    document.getElementById('formulaBox').style.display = 'block';
+  } else {
+    document.getElementById('formulaBox').style.display = 'none';
+  }
+}
+
+function updateProgressTransient() {
+  const trans = simParams.transient || 0;
+  if (!events.length || trans === 0) {
+    document.getElementById('progressTrans').style.width = '0%';
+    return;
+  }
+  const transSteps = events.filter(e => e.trip < trans).length;
+  document.getElementById('progressTrans').style.width = (transSteps / events.length * 100) + '%';
+}
+
+function renderFormula(ev) {
+  const box = document.getElementById('formulaBox');
+  const busLabel = ev.bus === 0 ? '<span class="f-bus1">Bus 1</span>' : '<span class="f-bus2">Bus 2</span>';
+  const bc = ev.bus === 0 ? 'f-bus1' : 'f-bus2';
+  const sub = ev.bus === 0 ? '₁' : '₂';
+  const S = ev.bus === 0 ? simParams.S1 : simParams.S2;
+  const G = simParams.G;
+  const H = ev.headway;
+  const t1 = G * H;
+  const t2 = 1 / (1 + S * H);
+  box.innerHTML = `
+    <div class="f-line">${busLabel} arrives at Origin <span class="f-dim">(Trip ${ev.trip})</span></div>
+    <div class="f-line"><span class="f-dim">Headway:</span> <span class="${bc}">H${sub}</span> <span class="f-op">=</span> ${ev.time.toFixed(3)} <span class="f-op">−</span> ${ev.lastArrival.toFixed(3)} <span class="f-op">=</span> <span class="f-result">${H.toFixed(4)}</span></div>
+    <div class="f-line"><span class="f-dim">Tour time:</span> <span class="${bc}">ΔT${sub}</span> <span class="f-op">=</span> <span class="f-param">Γ</span>·H <span class="f-op">+</span> 1/(1+<span class="f-param">S${sub}</span>·H) <span class="f-op">=</span> ${G}×${H.toFixed(3)} <span class="f-op">+</span> 1/(1+${S}×${H.toFixed(3)}) <span class="f-op">=</span> ${t1.toFixed(3)} <span class="f-op">+</span> ${t2.toFixed(3)} <span class="f-op">=</span> <span class="f-result">${ev.tourTime.toFixed(4)}</span></div>
+    <div class="f-line"><span class="f-dim">Next arrival:</span> <span class="${bc}">T${sub}(${ev.trip+1})</span> <span class="f-op">=</span> ${ev.time.toFixed(3)} <span class="f-op">+</span> ${ev.tourTime.toFixed(3)} <span class="f-op">=</span> <span class="f-result">${ev.nextArrival.toFixed(4)}</span></div>`;
+}
+
+/* ===== ELLIPTICAL TRACK (arc-length parameterised) ===== */
+// Arc-length lookup table so a bus travels at constant visual speed along the
+// ellipse (otherwise it appears to crawl near the left/right vertices).
+let _arc = null;
+function arcLUT(rx, ry) {
+  const key = Math.round(rx) + '_' + Math.round(ry);
+  if (_arc && _arc.key === key) return _arc;
+  const N = 1440;
+  const s = new Float64Array(N + 1);
+  let px = rx * Math.cos(Math.PI), py = ry * Math.sin(Math.PI), cum = 0;
+  s[0] = 0;
+  for (let i = 1; i <= N; i++) {
+    const th = Math.PI - 2 * Math.PI * (i / N);
+    const x = rx * Math.cos(th), y = ry * Math.sin(th);
+    cum += Math.hypot(x - px, y - py);
+    s[i] = cum; px = x; py = y;
+  }
+  for (let i = 0; i <= N; i++) s[i] /= cum;
+  _arc = { key, s, N };
+  return _arc;
+}
+
+// frac: arc-length fraction 0..1. 0 = Origin (left), 0.5 = Destination (right),
+// travelling over the top first then back along the bottom.
+function busPos(cx, cy, rx, ry, frac) {
+  frac = Math.max(0, Math.min(1, frac));
+  const lut = arcLUT(rx, ry), s = lut.s, N = lut.N;
+  let lo = 0, hi = N;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (s[mid] < frac) lo = mid + 1; else hi = mid; }
+  const i = Math.max(1, lo);
+  const t = s[i] > s[i - 1] ? (frac - s[i - 1]) / (s[i] - s[i - 1]) : 0;
+  const u = (i - 1 + t) / N;
+  const angle = Math.PI - 2 * Math.PI * u;
+  return { x: cx + rx * Math.cos(angle), y: cy - ry * Math.sin(angle), angle };
+}
+
+// Map raw tour progress (0..1, linear in time) onto an arc-length position,
+// inserting visible dwell pauses at Origin (boarding) and Destination (alighting).
+// In the paper, (γ+η)B = Γ·H is the combined boarding+alighting time. We split
+// it 50/50 between the two stations since γ and η are not given separately.
+function tourToTrack(p, dwellFrac) {
+  const total = Math.max(0, Math.min(0.85, dwellFrac || 0));
+  const dOri = total * 0.5;     // boarding dwell at Origin
+  const dDest = total * 0.5;    // alighting dwell at Destination
+  const travel = 1 - total;
+  const tLeg = travel * 0.5;    // each leg gets half the travel budget
+  // timeline: [0..dOri] origin dwell, [..+tLeg] going, [..+dDest] dest dwell, [..+tLeg] returning
+  const t1 = dOri, t2 = t1 + tLeg, t3 = t2 + dDest, t4 = t3 + tLeg;
+  if (p <= t1) return 0;
+  if (p <= t2) return 0.5 * (p - t1) / tLeg;
+  if (p <= t3) return 0.5;
+  return 0.5 + 0.5 * (p - t3) / tLeg;
+}
+
+
+function renderTrack(frac) {
+  const c = document.getElementById('trackCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = c.clientHeight;
+  c.width = w * dpr; c.height = h * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, w, h);
+
+  if (!events.length) return;
+  const ev = events[currentStep];
+  const nextEv = currentStep < events.length - 1 ? events[currentStep + 1] : ev;
+  const displayTime = ev.time + frac * (nextEv.time - ev.time);
+
+  const cx = w / 2;
+  const cy = h / 2 + 4;
+  const rx = Math.min(w * 0.42, 230);
+  const ry = Math.min(h * 0.36, 130);
+
+  // Track road
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = '#e8ebf0';
+  ctx.lineWidth = 32;
+  ctx.stroke();
+
+  // Track border lines
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx + 16, ry + 16, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = '#d1d5db';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx - 16, ry - 16, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = '#d1d5db';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Center dashed line
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = '#c3ccda';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([10, 8]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Direction arrows on track
+  const arrowPositions = [
+    { t: 0.15, label: '→', above: true },
+    { t: 0.35, label: '→', above: true },
+    { t: 0.65, label: '←', above: false },
+    { t: 0.85, label: '←', above: false },
+  ];
+  ctx.font = '16px sans-serif';
+  ctx.fillStyle = '#9ca3af';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (const a of arrowPositions) {
+    const p = busPos(cx, cy, rx, ry, a.t);
+    ctx.fillText(a.label, p.x, p.y);
+  }
+
+  // "Going" / "Returning" labels
+  ctx.font = '500 11px IBM Plex Sans, sans-serif';
+  ctx.fillStyle = '#9ca3af';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('Going →', cx, cy - ry - 24);
+  ctx.fillText('← Returning', cx, cy + ry + 26);
+
+  // Station: Origin (left)
+  const oPos = busPos(cx, cy, rx, ry, 0);
+  ctx.beginPath();
+  ctx.arc(oPos.x, oPos.y, 18, 0, Math.PI * 2);
+  ctx.fillStyle = '#3253dc';
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = '700 10px IBM Plex Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('ORI', oPos.x, oPos.y);
+
+  // Station: Destination (right)
+  const dPos = busPos(cx, cy, rx, ry, 0.5);
+  ctx.beginPath();
+  ctx.arc(dPos.x, dPos.y, 18, 0, Math.PI * 2);
+  ctx.fillStyle = '#3253dc';
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = '700 10px IBM Plex Sans, sans-serif';
+  ctx.fillText('DEST', dPos.x, dPos.y);
+
+  // Labels for stations
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#0b1b34';
+  ctx.font = '600 13px IBM Plex Sans, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('Origin', oPos.x - 26, oPos.y + 5);
+  ctx.textAlign = 'left';
+  ctx.fillText('Destination', dPos.x + 26, dPos.y + 5);
+
+  // Demand accumulated at Origin (proportional to elapsed time × μ)
+  const waitH = displayTime - ev.lastArrival;
+  ctx.fillStyle = '#6b7891';
+  ctx.font = '600 11px IBM Plex Mono, monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(`ΔT=${waitH.toFixed(2)}`, oPos.x - 26, oPos.y + 20);
+
+  // Proportional dot indicator
+  const dotCount = Math.min(Math.round(waitH * 10), 20);
+  for (let d = 0; d < dotCount; d++) {
+    const dx = oPos.x - 34 - (d % 5) * 7;
+    const dy = oPos.y + 28 + Math.floor(d / 5) * 7;
+    ctx.beginPath();
+    ctx.arc(dx, dy, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#9ca3af';
+    ctx.fill();
+  }
+
+  // Draw buses
+  const busColors = ['#3b82f6','#ef4444','#f59e0b','#10b981','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
+
+  for (let b = 0; b < (simParams.M || 2); b++) {
+    const dep = ev.busDepT[b];
+    const dt = ev.busTourT[b];
+    let progress = dt > 0 ? (displayTime - dep) / dt : 1;
+    progress = Math.max(0, Math.min(progress, 1));
+
+    // Insert visible boarding/alighting dwell pauses at the two stations.
+    const dwellFrac = ev.busDwellFrac ? ev.busDwellFrac[b] : 0;
+    const track = tourToTrack(progress, dwellFrac);
+    const pos = busPos(cx, cy, rx, ry, track);
+
+    ctx.save();
+    ctx.shadowColor = busColors[b];
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 16, 0, Math.PI * 2);
+    ctx.fillStyle = busColors[b];
+    ctx.fill();
+    ctx.restore();
+
+    // White border
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 16, 0, Math.PI * 2);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Bus label
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 12px IBM Plex Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`B${b + 1}`, pos.x, pos.y);
+    ctx.textBaseline = 'alphabetic';
+
+    // Trip + passenger label
+    const tripNum = ev.busTrip[b];
+    const labelY = pos.y < cy ? pos.y - 22 : pos.y + 28;
+    ctx.fillStyle = busColors[b];
+    ctx.font = '500 10px IBM Plex Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Trip ${tripNum}`, pos.x, labelY);
+  }
+
+  // Headway indicator at center
+  if (ev.headway < 20) {
+    const hPct = Math.min(ev.headway / 3, 1);
+    const hColor = hPct < 0.2 ? '#ef4444' : hPct < 0.5 ? '#ea580c' : '#16a34a';
+    ctx.fillStyle = hColor;
+    ctx.font = '600 13px IBM Plex Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`H = ${ev.headway.toFixed(3)}`, cx, cy);
+    ctx.textBaseline = 'alphabetic';
+  }
+}
+
+/* ===== GRAPH RENDERING ===== */
+function renderGraphs() {
+  renderReturnMap(0, 'gReturn1', '#3b82f6');
+  renderReturnMap(1, 'gReturn2', '#ef4444');
+}
+
+function setupCanvas(id) {
+  const c = document.getElementById(id);
+  const dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = c.clientHeight;
+  c.width = w * dpr; c.height = h * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, w, h);
+  return { ctx, w, h };
+}
+
+function drawGraph(id, getData, xLabel, yLabel, opts = {}) {
+  const { ctx, w, h } = setupCanvas(id);
+  const margin = { top: 12, right: 14, bottom: 30, left: 48 };
+  const pw = w - margin.left - margin.right;
+  const ph = h - margin.top - margin.bottom;
+
+  const data = getData();
+  if (!data.length) return;
+
+  let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
+  for (const d of data) {
+    if (isFinite(d.x) && isFinite(d.y)) {
+      xMin = Math.min(xMin, d.x); xMax = Math.max(xMax, d.x);
+      yMin = Math.min(yMin, d.y); yMax = Math.max(yMax, d.y);
+    }
+  }
+  const xRange = xMax - xMin || 1;
+  const yRange = yMax - yMin || 1;
+  const pad = 0.05;
+  xMin -= xRange * pad; xMax += xRange * pad;
+  yMin -= yRange * pad; yMax += yRange * pad;
+  if (yMin < 0) yMin = 0;
+  if (opts.xMin !== undefined) xMin = opts.xMin;
+  if (opts.yMin !== undefined) yMin = opts.yMin;
+
+  const toX = x => margin.left + (x - xMin) / (xMax - xMin) * pw;
+  const toY = y => margin.top + (1 - (y - yMin) / (yMax - yMin)) * ph;
+
+  ctx.strokeStyle = '#eef1f6';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = margin.top + (i / 4) * ph;
+    ctx.beginPath(); ctx.moveTo(margin.left, y); ctx.lineTo(w - margin.right, y); ctx.stroke();
+  }
+
+  ctx.fillStyle = '#6b7891';
+  ctx.font = '10px IBM Plex Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(xLabel, margin.left + pw / 2, h - 4);
+  ctx.save();
+  ctx.translate(10, margin.top + ph / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText(yLabel, 0, 0);
+  ctx.restore();
+
+  ctx.font = '9px IBM Plex Mono, monospace';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const v = yMin + (1 - i / 4) * (yMax - yMin);
+    ctx.fillText(v.toFixed(2), margin.left - 4, margin.top + (i / 4) * ph + 3);
+  }
+  ctx.textAlign = 'center';
+  for (let i = 0; i <= 4; i++) {
+    const v = xMin + (i / 4) * (xMax - xMin);
+    ctx.fillText((xMax - xMin) < 5 ? v.toFixed(2) : Math.round(v).toString(), margin.left + (i / 4) * pw, h - 16);
+  }
+
+  if (opts.diagonal) {
+    ctx.strokeStyle = '#c3ccda';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    const dMin = Math.max(xMin, yMin);
+    const dMax = Math.min(xMax, yMax);
+    ctx.beginPath(); ctx.moveTo(toX(dMin), toY(dMin)); ctx.lineTo(toX(dMax), toY(dMax)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  for (const d of data) {
+    if (!isFinite(d.x) || !isFinite(d.y) || d.y > yMax * 2) continue;
+    const px = toX(d.x), py = toY(d.y);
+    if (px < margin.left || px > w - margin.right || py < margin.top || py > margin.top + ph) continue;
+    ctx.fillStyle = d.color || '#3b82f6';
+    ctx.globalAlpha = d.step <= currentStep ? (d.step === currentStep ? 1 : 0.5) : 0.08;
+    ctx.beginPath();
+    ctx.arc(px, py, d.step === currentStep ? 3.5 : 1.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  const last = data.filter(d => d.step === currentStep);
+  for (const d of last) {
+    if (!isFinite(d.x) || !isFinite(d.y)) continue;
+    ctx.strokeStyle = d.color || '#3b82f6';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(toX(d.x), toY(d.y), 7, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function renderReturnMap(busIdx, canvasId, color) {
+  const trans = simParams.transient || 0;
+  drawGraph(canvasId, () => {
+    const pts = [];
+    const busH = [];
+    for (let i = 0; i <= currentStep && i < events.length; i++) {
+      if (events[i].bus === busIdx) busH.push({ h: events[i].headway, step: i, trip: events[i].trip });
+    }
+    for (let j = 1; j < busH.length; j++) {
+      if (busH[j].trip < trans) continue;
+      const hp = busH[j-1].h, hc = busH[j].h;
+      if (hp < 50 && hc < 50) pts.push({ x: hp, y: hc, color, step: busH[j].step });
+    }
+    return pts;
+  }, 'H(m)', 'H(m+1)', { diagonal: true, xMin: 0, yMin: 0 });
+}
+
+function clearCanvas(id) {
+  const c = document.getElementById(id);
+  const dpr = window.devicePixelRatio || 1;
+  c.width = c.clientWidth * dpr; c.height = c.clientHeight * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, c.clientWidth, c.clientHeight);
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+window.addEventListener('resize', () => {
+  if (events.length) { renderState(); renderGraphs(); renderTrack(0); }
+});
+
+</script>
+</body>
+</html>
