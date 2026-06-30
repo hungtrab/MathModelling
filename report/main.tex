@@ -1,419 +1,323 @@
-\documentclass[10pt,english]{article}
-\raggedbottom
-\sloppy
+% Two-column paper style, max 10 pages
+\documentclass[9pt,twocolumn]{article}
+\usepackage[top=1.8cm,bottom=2cm,left=1.4cm,right=1.4cm,columnsep=0.45cm]{geometry}
 \usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{authblk}
+\usepackage{amsmath,amssymb}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage[english]{babel}
-\usepackage{setspace}
-\usepackage{times}
-\usepackage{indentfirst}
-\usepackage{titlepic}
-\usepackage{enumitem}
 \usepackage[utf8]{inputenc}
-\usepackage[T5]{fontenc}
-\usepackage{multirow}
+\usepackage[T1]{fontenc}
 \usepackage{booktabs}
-\usepackage{hyperref}
-\usepackage{charter}
-
-\usepackage[backend=bibtex]{biblatex}
-\addbibresource{sample.bib}
-
+\usepackage[hidelinks]{hyperref}
 \usepackage{placeins}
 \usepackage{float}
-\usepackage{subfig}
-\usepackage[table,xcdraw]{xcolor}
-\usepackage[letterpaper,top=2cm,bottom=2cm,left=2.75cm,right=2.75cm,marginparwidth=1.75cm]{geometry}
-\usepackage{dirtree}
-\usepackage{xcolor}
-\usepackage{calc}
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{sample.bib}
 \usepackage{titlesec}
-\usepackage{listings}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{authblk}
+\usepackage{stfloats}   % allow figure* at bottom of page
+\usepackage{enumitem}
 
-\renewcommand*\DTstylecomment{\rmfamily\itshape\color{gray}}
-\renewcommand*\DTstyle{\ttfamily} 
+% Tighter section spacing
+\titlespacing*{\section}{0pt}{6pt}{3pt}
+\titlespacing*{\subsection}{0pt}{4pt}{2pt}
+\titleformat{\section}{\normalsize\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\small\bfseries}{\thesubsection}{0.5em}{}
 
-% --- Custom Colors & Listings Style (Matched from Reference) ---
-\definecolor{yamlkey}{rgb}{0.02,0.17,0.09}
-\definecolor{yamlval}{rgb}{0.1,0.1,0.8}
-\definecolor{yamlcom}{rgb}{0.5,0.5,0.5}
+\setlength{\parskip}{2pt}
+\setlength{\parindent}{1em}
+\setlength{\abovecaptionskip}{4pt}
+\setlength{\belowcaptionskip}{0pt}
+\setlength{\floatsep}{6pt}
+\setlength{\textfloatsep}{6pt}
 
-\lstdefinelanguage{yaml}{
-  keywords={true,false,null,y,n},
-  keywordstyle=\color{darkgray}\bfseries,
-  basicstyle=\ttfamily\footnotesize,
-  sensitive=false,
-  comment=[l]{\#},
-  commentstyle=\color{yamlcom}\itshape,
-  stringstyle=\color{yamlval}\ttfamily,
-  morestring=[b]',
-  morestring=[b]",
-  moredelim=[l][\color{orange}]{\&},
-  moredelim=[l][\color{magenta}]{*},
-  moredelim=**[il][\color{red}\mdseries{:}\color{yamlval}\ttfamily]{:},
-}
+% Compact captions
+\usepackage[font=small,labelfont=bf,skip=3pt]{caption}
 
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\title{\large\textbf{\textit{Chaos Control and Schedule of Shuttle Buses}
+\normalfont\normalsize\ [Nagatani, 2006]}}
 
-\lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},   
-    commentstyle=\color{codegreen},
-    keywordstyle=\color{magenta},
-    numberstyle=\tiny\color{codegray},
-    stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
-    showstringspaces=false,
-    showtabs=false,                  
-    tabsize=2,
-    frame=single                     
-}
-
-\lstset{style=mystyle}
-
-% --- Spacing Adjustments (Matched from Reference) ---
-\setstretch{1.2} % Standard line spacing for readability
-\setlength{\parskip}{0.5em}
-\setlist{itemsep=0.2em, topsep=0.2em}
+\author[1]{Tran Quang Hung}
+\author[1]{Le Gia Huy}
+\author[1]{Nguyen Hoang Son Tung}
+\affil[1]{\small School of Information and Communications Technology,
+Hanoi University of Science and Technology\protect\newline
+\textbf{Supervisor: PhD.\ Bui Quoc Trung}}
+\date{}
 
 \begin{document}
 
- \begin{titlepage}
+% ── HUST Cover Page ──────────────────────────────────────────────────────────
+\begin{titlepage}
 \begin{center}
-
-\textsc{\large \textcolor{black}{\textbf{HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY }}}\\[0.5cm]
-
-{\huge \Large \uppercase{School of Information Communication Technology} \\[1cm] }
-
+\textsc{\large\textbf{HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY}}\\[0.5cm]
+{\large\textbf{\uppercase{School of Information and Communications Technology}}\\[1cm]}
 \includegraphics[scale=0.13]{logo-soict-hust-1.png}\\[1cm]
-\textsc{\Large \textbf{Project report:}}\\[0.4cm]	
+\textsc{\Large\textbf{Project Report}}\\[0.4cm]
+\rule{\linewidth}{0.7mm}\\[0.4cm]
+{\huge\bfseries\color{black!70!black} Chaos Control and Schedule of Shuttle Buses\\[0.4cm]}
+\rule{\linewidth}{0.7mm}\\[1cm]
 
-\rule{\linewidth}{0.7mm} \\[0.4cm]
-{ \huge \bfseries\color{black!70!black} Chaos Control and Schedule of Shuttle Buses\\[0.4cm] }
-\rule{\linewidth}{0.7mm} \\[1cm]
-
-\color{black!80!black}{\large \textbf{\textit{Supervised by}:}}\\[0.4cm]
-
+\color{black!80!black}{\large\textbf{\textit{Supervised by:}}}\\[0.4cm]
 \begin{tabular}{l}
-\large  Dr. Bui Quoc Trung  \\[1cm]
+\large\textbf{PhD.\ Bui Quoc Trung}\\[1cm]
 \end{tabular}
 
-\color{black!80!black}{\large \textbf{\textit{Presented by}:}}\\[0.4cm]
+\color{black!80!black}{\large\textbf{\textit{Presented by:}}}\\[0.4cm]
 \color{black}
-\begin{tabular}{l}
-
-\large Tran Quang Hung - 20235502 \\[0.4cm]
-\large Nguyen Hoang Son Tung - 20225536 \\[0.4cm]
-\large Le Gia Huy - 20225498 \\[0.4cm]
-
+\begin{tabular}{l@{\hspace{1.5cm}}r}
+\large Tran Quang Hung & \large 20235502\\[0.4cm]
+\large Nguyen Hoang Son Tung & \large 20225536\\[0.4cm]
+\large Le Gia Huy & \large 20225498\\[0.4cm]
 \end{tabular}
 
 \vfill
-
-{\large \color{black!80!black}{\textbf{Hanoi - Vietnam}}\\[0.2cm] \color{blue!90!black}2026}
-
+{\large\color{black!80!black}{\textbf{Hanoi -- Vietnam}}\\[0.2cm]
+\color{blue!90!black}\textbf{2026}}
 \end{center}
 \end{titlepage}
-\setstretch{1.5}
-\tableofcontents
-\newpage
+\setcounter{page}{1}
 
-\section{Introduction and Problem Statement}
+\twocolumn[{%
+\maketitle
+\vspace{-1em}
+\begin{center}
+\begin{minipage}{0.92\textwidth}
+\small\textbf{Abstract.}
+We reproduce all figures of Nagatani (2006)~\cite{nagatani}, which models $M$ shuttle buses as a discrete nonlinear map driven by passenger loading. An event-driven, min-heap simulator iterates $T_i(m+1)=T_i(m)+\Gamma H_i(m)+1/(1+S_i H_i(m))$ for arbitrary $M$ and per-bus speedup $S_i$. We confirm the paper's key results: the system undergoes period-adding bifurcations ($3\!\to\!5\!\to\!7\!\to\cdots$) rather than period-doubling as the loading parameter $\Gamma$ increases, with the onset delayed by higher speedup $S$; return maps exhibit deterministic piecewise-linear structure distinguishing chaos from noise; and the phase boundary $\Gamma^*(S)$ is found by bisection. We additionally show the model is robust to initial conditions and persists under additive noise up to 5\% of the mean headway. Extending to $M=3$ buses requires no new model: every qualitative insight carries over, with two new effects---return maps become two-valued in a single headway variable, and the maximum useful speedup before self-induced instability drops from $S_c\!\approx\!2.0$ to $\approx\!1.6$.
+\end{minipage}
+\end{center}
+\vspace{0.5em}
+}]
 
-\subsection{Introduction}
-A frequent phenomenon in shuttle bus networks is ``bus bunching'' or ``platooning,'' where scheduled service intervals break down, resulting in two or more buses arriving at a terminal simultaneously. This report explores this phenomenon by examining the mathematical framework presented by Takashi Nagatani in his 2006 paper, \textit{``Chaos control and schedule of shuttle buses''} \cite{nagatani}.
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Introduction}
 
-Bus bunching is driven by a positive feedback loop tied to passenger loading times. If a bus falls slightly behind schedule, more passengers accumulate at the stop. Loading these extra passengers delays the bus further. The subsequent bus encounters fewer waiting passengers and catches up. Without sufficient speed correction, this dynamic collapses the intended regular service intervals into irregular, clustered arrivals.
+Bus bunching arises from a positive feedback loop: a delayed bus accumulates more passengers, boards them more slowly, falls further behind, while the following bus catches up with fewer passengers. Nagatani~\cite{nagatani} showed this instability is \emph{deterministic}---no stochastic elements are needed. The system reduces to a single nonlinear map that exhibits period-adding bifurcations and chaos as loading increases, suppressed by a per-bus speed-correction parameter $S_i$.
 
-\subsection{Problem Statement}
-Irregularity in transportation networks is often attributed to stochastic factors: traffic congestion, weather, fluctuating passenger arrivals. However, nonlinear dynamics shows that transit networks can possess inherent deterministic instabilities.
+This report (i) implements the model and reproduces Figures 2--8 of the paper; (ii) tests sensitivity to initial conditions and robustness to additive noise; and (iii) extends the study to $M=3$ buses using the same map and algorithm, contributing Figures 9--11.
 
-In the absence of sufficient speed correction, even a noise-free environment with a constant passenger arrival rate can produce erratic schedules. The time headway (the interval between buses) dictates the passenger load, and the passenger load in turn dictates the delay. Buses therefore interact through the passengers waiting at the origin. This nonlinear interaction can generate \textbf{deterministic chaos}---complex, aperiodic behavior arising from deterministic rules. The core problem is finding a mathematical framework to understand this chaotic breakdown and determining a control mechanism to restore schedule regularity.
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Mathematical Model}
 
-\subsection{Objective}
-This report computationally replicates the model and findings of Nagatani~\cite{nagatani}. Specifically, we aim to:
-\begin{enumerate}
-    \item Implement the discrete nonlinear map (Eq.~5 of the paper) and the event-driven simulation that handles bus overtaking.
-    \item Reproduce the bifurcation diagrams, return maps, and statistical analyses (Figures~2--7 of the paper).
-    \item Implement the speedup control mechanism and verify its effect on the onset of chaos.
-    \item Reconstruct the phase diagram (Figure~8) mapping the boundary between regular and chaotic regimes.
-\end{enumerate}
-
-\subsection{Scope}
-This project reproduces the methodology and results of Nagatani (2006) without introducing new variables or control mechanisms. The simulation uses $M=2$ buses with the two dimensionless parameters $\Gamma$ and $S$ as defined by the paper. Consistent with the original work, no stochastic elements are included; the model is deterministic.
-
-\section{Mathematical Model Formulation}
-
-This section derives the nonlinear map used to model the system, following \cite{nagatani}.
-
-\subsection{Modeling Approach}
-
-The paper models the shuttle bus system as a \textbf{discrete-time dynamical system}. Two reasons motivate this choice:
-
-\begin{itemize}
-    \item \textbf{Discrete Event Nature:} Bus arrivals occur at discrete intervals (trips), making difference equations a natural choice over continuous differential equations. The state update from trip $m$ to $m+1$ is captured by a single map equation.
-    
-    \item \textbf{Isolating Deterministic Chaos:} In transportation research, schedule irregularities are often modeled using stochastic methods. The author instead selected a deterministic discrete-time approach to isolate a specific mechanism: bus bunching can arise as a mathematical instability even in the absence of noise. By removing all stochastic elements, the model shows that schedule collapse can be driven by the nonlinear feedback loop of passenger loading times alone.
-\end{itemize}
-
-
-\subsection{Physical Variables and Assumptions}
-Consider a system of $M$ buses shuttling back and forth between a starting point (origin) and a destination. The physical distance between the origin and the destination is $L$. 
-
-Let $t_i(m)$ denote the arrival time of bus $i$ at the origin during its $m$-th trip. When the bus arrives, it must load waiting passengers and later unload them at the destination. The number of passengers boarding bus $i$ at trip $m$ is defined as $B_i(m)$. 
-
-The time required to load a single passenger is $\gamma$, and the time required to unload a passenger is $\eta$. Therefore, the total time a bus spends stationary (stopping time) during one complete tour is the sum of the boarding and unloading times, given by $(\gamma + \eta)B_i(m)$. 
-
-\subsection{Derivation of Bus Kinematics}
-The arrival time of a bus at its next trip, $t_i(m+1)$, is the sum of its current arrival time, the total stopping time, and the moving time. The moving time is defined as $2L / V_i(m)$, where $V_i(m)$ is the mean speed of bus $i$ during trip $m$. The fundamental equation of motion for the bus is therefore:
-\begin{equation}
-    t_i(m+1) = t_i(m) + (\gamma + \eta)B_i(m) + \frac{2L}{V_i(m)} \quad \text{for} \quad i = 1, 2, \dots, M
-    \label{eq:motion}
-\end{equation}
-
-Let $W_i(m)$ denote the number of passengers waiting at the origin when bus $i$ arrives on trip $m$. Since passengers arrive at a constant rate $\mu$, the number waiting is proportional to the time elapsed since the previous bus departed. Let $i'$ denote the bus that arrived just before bus $i$, and $t_{i'}(m')$ be its arrival time. Then:
+Consider $M$ buses on a single route of length $L$. Let $t_i(m)$ be the arrival time of bus $i$ at the origin on trip $m$. Passengers arrive at rate $\mu$; the number boarding bus $i$ is proportional to the headway since the previous bus:
 \[
-    W_i(m) = \mu \left( t_i(m) - t_{i'}(m') \right)
+    B_i(m) = \mu\bigl(t_i(m)-t_{i'}(m')\bigr),
 \]
-Assuming the bus has sufficient capacity, all waiting passengers board: $B_i(m) = W_i(m)$. Therefore:
+where $i'$ is the immediately preceding bus. Each bus speeds up proportionally to its load: $V_i(m)=V_0+s_i(\gamma+\eta)B_i(m)$. Substituting and non-dimensionalising time by the baseline tour time $2L/V_0$, defining $T_i(m)=t_i(m)V_0/(2L)$, $\Gamma=\mu(\gamma+\eta)$, and $S_i=s_i\mu(\gamma+\eta)2L/V_0^2$ yields the \textbf{Nagatani map}:
 \begin{equation}
-    B_i(m) = \mu \left( t_i(m) - t_{i'}(m') \right)
-    \label{eq:passengers}
-\end{equation}
-The term $(t_i(m) - t_{i'}(m'))$ is the time \textit{headway} between successive bus arrivals at the origin.
-
-To prevent the schedule from collapsing due to the delay caused by loading passengers, a control mechanism is introduced. The bus increases its speed proportionally to the delay incurred at the stops. The adjusted velocity $V_i(m)$ is defined as:
-\begin{equation}
-    V_i(m) = V_0 + s_i(\gamma + \eta)B_i(m)
-    \label{eq:velocity}
-\end{equation}
-where $V_0$ is the baseline mean speed of a bus without any speedup, and $s_i$ is the specific degree of speedup assigned to bus $i$.
-
-Substituting Equation \eqref{eq:passengers} and Equation \eqref{eq:velocity} into Equation \eqref{eq:motion} yields the combined equation of motion:
-\begin{equation}
-    t_i(m+1) = t_i(m) + \mu(\gamma + \eta)\left(t_i(m) - t_{i'}(m')\right) + \frac{2L}{V_0 + s_i\mu(\gamma + \eta)\left(t_i(m) - t_{i'}(m')\right)}
-    \label{eq:combined}
-\end{equation}
-
-\subsection{Non-Dimensionalization and the Nonlinear Map}
-To analyze the dynamical properties of the system universally, Equation \eqref{eq:combined} is non-dimensionalized. Time is scaled by the characteristic baseline tour time, $2L/V_0$. We define the dimensionless arrival time $T_i(m)$ as:
-\begin{equation}
-    T_i(m) \equiv t_i(m)\frac{V_0}{2L}
-\end{equation}
-
-This simplifies the system into a discrete nonlinear map governed entirely by two dimensionless parameters:
-\begin{enumerate}
-    \item \textbf{Loading Parameter ($\Gamma$):} Represents the baseline delay caused by passenger boarding and unloading. It is defined as $\Gamma \equiv \mu(\gamma + \eta)$. Higher values indicate greater passenger loads.
-    \item \textbf{Speedup Parameter ($S_i$):} Represents the control mechanism's strength for bus $i$, defined as $S_i \equiv s_i\mu(\gamma + \eta)\frac{2L}{V_0^2}$.
-\end{enumerate}
-
-Applying these dimensionless variables to Equation \eqref{eq:combined} yields the final simplified nonlinear map:
-\begin{equation}
-    T_i(m+1) = T_i(m) + \Gamma \left(T_i(m) - T_{i'}(m')\right) + \frac{1}{1 + S_i\left(T_i(m) - T_{i'}(m')\right)}
+    T_i(m+1) = T_i(m) + \Gamma H_i(m) + \frac{1}{1+S_i H_i(m)},
     \label{eq:final_map}
 \end{equation}
+where $H_i(m)=T_i(m)-T_{i'}(m')$ is the dimensionless headway. The predecessor $i'$ changes dynamically as buses overtake each other.
 
-Equation \eqref{eq:final_map} is the map iterated in our simulation. The term $\left(T_i(m) - T_{i'}(m')\right)$ is the dimensionless headway. Because buses can overtake, the identity of the preceding bus $i'$ changes dynamically, requiring the simulation to process arrivals in chronological order (see Section~3).
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Simulation Methodology}
 
-\section{Computational Methodology and Simulation Design}
-
-The simulation iterates Equation~\ref{eq:final_map} from an initial state. Because buses can overtake each other, the arrival order changes dynamically---Bus~1 may arrive twice before Bus~2 completes one trip. A simple alternating loop is therefore insufficient; instead we use an event-driven approach described below.
-
-\subsection{Event-Driven Simulation with a Min-Heap}
-Because buses can overtake each other, the arrival order is not fixed in advance. We use a min-heap (Python's \texttt{heapq} module) as a priority queue to process arrivals in chronological order. Each entry is a tuple \texttt{(arrival\_time, bus\_id, trip\_id)}. At each step, the event with the smallest arrival time is popped, ensuring the nonlinear map is always evaluated for the next bus to arrive at the origin.
-
-\subsection{Headway and Tour Time Calculation}
-For each popped event, two quantities are computed:
-\begin{enumerate}
-    \item \textbf{Headway} $H = T_{\text{current}} - T_{\text{last}}$, the time since the previous bus arrived at the origin.
-    \item \textbf{Tour time} $\Delta T = \Gamma \cdot H + \frac{1}{1 + S_i \cdot H}$, i.e.\ the nonlinear map (Equation~\ref{eq:final_map}).
-\end{enumerate}
-The bus's next arrival $T_{\text{current}} + \Delta T$ is pushed back onto the heap, and \texttt{last\_arrival\_time} is updated.
-
-\subsection{Initial Conditions and Transient Elimination}
-We discard the first portion of each simulation run as transient. Specific choices:
-\begin{itemize}
-    \item \textbf{Initial conditions:} $M=2$ buses, with Bus~0 arriving at $T=0.0$ and Bus~1 at $T=0.5$. The initial ``previous arrival time'' is set to $T=-0.5$ so that the first headway equals $0.5$ for both buses. This is an implementation choice (the paper does not specify an initial predecessor time).
-    \item \textbf{Transient elimination:} The paper runs 1{,}000 trips and discards the first 900, analysing trips 900--1{,}000. We extended this: each run iterates 1{,}200 trips (2{,}000 for return maps), discarding the first 1{,}000 to ensure convergence to the asymptotic regime.
-\end{itemize}
-
-\subsection{Pseudocode}
-
-Algorithm~\ref{alg:sim} summarises the event-driven simulation. The key idea is that the predecessor bus is always the most recent arrival---determined dynamically by the heap, not by a fixed alternating schedule.
+Because buses may overtake, we process arrivals chronologically using a min-heap $\mathcal{Q}$ of \texttt{(arrival\_time, bus\_id, trip)} events. The previously popped event provides the predecessor; its arrival time is the headway reference.
 
 \begin{algorithm}[H]
-\caption{Event-driven simulation of the Nagatani map}\label{alg:sim}
+\caption{Event-driven Nagatani simulator}\label{alg:sim}
 \begin{algorithmic}[1]
-\Require $\Gamma$, $S_1, S_2, \dots, S_M$, number of trips $N$, transient $N_t$
-\State Initialise arrival times: $T_1(0) \gets 0,\; T_2(0) \gets 0.5$ \Comment{evenly spaced}
-\State Push all $(T_i(0),\; i,\; 0)$ onto min-heap $\mathcal{H}$
-\State $T_{\mathrm{prev}} \gets \textsc{None}$
-\While{$\mathcal{H}$ is not empty}
-    \State $(T,\; i,\; m) \gets \textsc{PopMin}(\mathcal{H})$
-    \If{$T_{\mathrm{prev}} = \textsc{None}$}
-        \State $H \gets 0$ \Comment{first event: no predecessor}
-    \Else
-        \State $H \gets T - T_{\mathrm{prev}}$
-    \EndIf
-    \State $\Delta T \gets \Gamma \cdot H + \dfrac{1}{1 + S_i \cdot H}$ \Comment{nonlinear map (Eq.~\ref{eq:final_map})}
-    \State $T_{\mathrm{next}} \gets T + \Delta T$
-    \If{$m \geq N_t$}
-        \State Record $H$ and $\Delta T$ for bus $i$
-    \EndIf
-    \State $T_{\mathrm{prev}} \gets T$
-    \If{$m + 1 < N$}
-        \State Push $(T_{\mathrm{next}},\; i,\; m+1)$ onto $\mathcal{H}$
-    \EndIf
+\footnotesize
+\Require $\Gamma$, $S_1,\ldots,S_M$, trips $N$, transient $N_t$
+\State Init $T_i(0)$ evenly; push $(T_i(0),i,0)$ onto $\mathcal{Q}$
+\State $T_{\mathrm{prev}}\gets -1/M$ \Comment{first headway $\approx 1/M$}
+\While{$\mathcal{Q}$ not empty}
+    \State $(T,i,m)\gets\textsc{PopMin}(\mathcal{Q})$
+    \State $h\gets T-T_{\mathrm{prev}}$;\quad $\Delta T\gets\Gamma h+1/(1+S_i h)$
+    \If{$m\geq N_t$} record $h$, $\Delta T$ for bus $i$ \EndIf
+    \State $T_{\mathrm{prev}}\gets T$;\quad push $(T+\Delta T,\,i,\,m{+}1)$
 \EndWhile
 \end{algorithmic}
 \end{algorithm}
 
+Each run uses $N=1{,}200$ trips with transient $N_t=1{,}000$, matching the paper's steady-state window. Return maps use $N=2{,}000$. The simulator is M-agnostic: \texttt{simulate(G, S, M=3)} requires no code change beyond specifying $M$ and a length-$M$ speedup vector.
 
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Results: Paper Reproduction ($M=2$)}
 
+\subsection{Bifurcation Diagrams (Figs.~2--3)}
 
+Figure~\ref{fig:fig2_bifurcation} shows steady-state headway of Bus~1 vs.\ $\Gamma$ for four speedup configurations. Without speedup (a), headway fluctuates from $\Gamma\to0$: there is no stable regime at all---speedup is a necessary condition for regular operation. Equal speedup (b) stabilises the system until $\Gamma\approx0.167$, after which a period-adding cascade begins. Graded speedup (d) shifts this cascade slightly and produces asymmetric fluctuation amplitudes between buses.
 
-\section{Results and Analysis}
-
-After discarding the first 1{,}000 transient trips, we analyse the asymptotic behaviour as $\Gamma$ increases, and examine the effect of the speedup parameter $S$.
-
-\subsection{Bifurcation and the Onset of Chaos (Headway Analysis)}
-Figure \ref{fig:fig2_bifurcation} shows the bifurcation diagrams of the time headway of Bus~1 versus $\Gamma$ for four speedup configurations.
-
-In Figure \ref{fig:fig2_bifurcation}(a) ($S_1 = S_2 = 0$, no speedup), the headway fluctuates from low $\Gamma$ onward, eventually filling a continuous band (chaos). With equal speedup $S_1 = S_2 = 0.2$ in (b), the headway remains constant until $\Gamma \approx 0.167$, after which bifurcations begin.
-
-Figures \ref{fig:fig2_bifurcation}(c) and (d) show the transitions that occur when the buses have unequal speedup parameters.
-
-\begin{figure}[htbp]
+\begin{figure*}[tbp]
     \centering
-    % Replace 'fig2_bifurcation.png' with your actual image file name
-    \includegraphics[width=\textwidth]{fig2_bifurcation.png}
-    \caption{Bifurcation diagrams showing the time headway of Bus 1 plotted against the loading parameter $\Gamma$ (for trips $m = 1000$ to $1200$). Diagrams represent: (a) $S_1 = S_2 = 0$, (b) $S_1 = S_2 = 0.2$, (c) $S_1 = 0.3, S_2 = 0.2$, and (d) $S_1 = 0.5, S_2 = 0.2$.}
+    \includegraphics[width=\textwidth,height=0.43\textheight,keepaspectratio]{fig2_bifurcation.png}
+    \caption{Bifurcation diagrams: $H_1(m)$ vs.\ $\Gamma$, trips 1000--1200. (a)~$S_1\!=\!S_2\!=\!0$, (b)~$S_1\!=\!S_2\!=\!0.2$, (c)~$S_1\!=\!0.3,S_2\!=\!0.2$, (d)~$S_1\!=\!0.5,S_2\!=\!0.2$.}
     \label{fig:fig2_bifurcation}
-\end{figure}
+\end{figure*}
 
-To better understand the exact mathematical transitions into chaos, Figure \ref{fig:fig3_zoom} provides an enlargement of the low-load region ($0 < \Gamma < 0.5$). 
+Figure~\ref{fig:fig3_zoom} zooms to $\Gamma\in[0,0.5]$, revealing the \textbf{period-adding} route to chaos: periods grow $3\to5\to7\to\cdots$ rather than doubling. This is a hallmark of piecewise-smooth maps and qualitatively distinct from period-doubling cascades. Regularity windows---brief returns to periodic orbits within the chaotic band---are visible in case (b).
 
-Looking closely at Figure \ref{fig:fig3_zoom}(d), we observe period-adding bifurcations (as identified by Nagatani): at $\Gamma = 0.167$, the regular motion splits into periodic motion whose period increases incrementally until the orbits dissolve into a dense chaotic band at $\Gamma \approx 0.248$. Note that this is \textit{period-adding} (periods grow by addition, e.g.\ $3 \to 5 \to 7$), not period-doubling ($2 \to 4 \to 8$). This shows that bus bunching is not a random occurrence but a deterministic transition governed by parameter thresholds. Furthermore, increasing the speedup parameter $S$ extends the range of regular motion, suppressing the onset of chaos.
-
-\begin{figure}[htbp]
+\begin{figure*}[tbp]
     \centering
-    % Replace 'fig3_zoom.png' with your actual image file name
-    \includegraphics[width=0.75\textwidth]{fig3_zoom.png}
-    \caption{Enlargement of the bifurcation diagrams from Figure \ref{fig:fig2_bifurcation} focusing on the critical transition region $0 < \Gamma < 0.5$. The diagrams clearly display the period-adding bifurcations leading into deterministic chaos.}
+    \includegraphics[width=\textwidth,height=0.43\textheight,keepaspectratio]{fig3_zoom.png}
+    \caption{Zoom of Fig.~\ref{fig:fig2_bifurcation} to $0<\Gamma<0.5$, showing the period-adding bifurcation fan.}
     \label{fig:fig3_zoom}
-\end{figure}
+\end{figure*}
 
-\subsection{Tour Time Dynamics}
-While the headway measures the gap between successive arrivals, the tour time is the round-trip duration for an individual bus. Figure \ref{fig:fig4_tour} shows the tour times for both buses under unequal speedup ($S_1 = 0.5, S_2 = 0.2$).
+\subsection{Tour Time Dynamics (Figs.~4--5)}
 
-\begin{figure}[htbp]
+\begin{figure*}[tbp]
     \centering
-    % Replace 'fig4_tour.png' with your actual image file name
-    \includegraphics[width=\textwidth]{fig4_tour.png}
-    \caption{Tour times of Bus 1 (a) and Bus 2 (b) plotted against loading parameter $\Gamma$ for unequal speedup parameters $S_1 = 0.5$ and $S_2 = 0.2$.}
+    \includegraphics[width=\textwidth,height=0.30\textheight,keepaspectratio]{fig4_tour.png}
+    \caption{Tour times $\Delta T_1$ (a) and $\Delta T_2$ (b) vs.\ $\Gamma$ for $S_1\!=\!0.5$, $S_2\!=\!0.2$.}
     \label{fig:fig4_tour}
-\end{figure}
+\end{figure*}
 
-The differing speedup values produce asymmetric dynamics. Both buses maintain identical tour times until $\Gamma = 0.167$. Past this threshold, Bus~1 ($S_1=0.5$) fluctuates with larger amplitude because its stronger speedup causes it to overcompensate: a large headway triggers a large speed increase, which overshoots the equilibrium and produces a small headway on the next trip. Bus~2 ($S_2=0.2$) reacts more weakly and initially remains more constrained. As $\Gamma$ increases past $0.333$, the two buses exchange roles in fluctuation amplitude, showing that they are coupled through headway but respond differently due to their unequal $S_i$ values.
+Figure~\ref{fig:fig4_tour} shows tour times for $S_1=0.5$, $S_2=0.2$. Both buses are synchronised until $\Gamma\approx0.167$. Beyond that, Bus~1's stronger speedup causes larger overshoot: big headway $\to$ big speed increase $\to$ small next headway. Bus~2 reacts weakly and initially stays constrained; their amplitude roles swap at $\Gamma\approx0.333$ (Point~2 of Fig.~\ref{fig:fig7_stats}). Figure~\ref{fig:fig5_tour_zoom} confirms the transition points align exactly with the headway bifurcations.
 
-To examine these asymmetric tour time transitions in greater detail, Figure \ref{fig:fig5_tour_zoom} provides a magnified view of the low-load region ($0 < \Gamma < 0.5$). The transition points observed here align perfectly with the bifurcation points identified in the headway analysis (Figure \ref{fig:fig3_zoom}), confirming that the systemic breakdown simultaneously affects both the spacing between buses and the duration of their individual trips.
-
-\begin{figure}[htbp]
+\begin{figure*}[tbp]
     \centering
-    % Replace 'fig5_tour_zoom.png' with your actual image file name
-    \includegraphics[width=\textwidth]{fig5_tour_zoom.png}
-    \caption{Enlargement of the tour time dynamics from Figure \ref{fig:fig4_tour} for the range $0 < \Gamma < 0.5$, highlighting the precise transition points from regular to periodic and chaotic motions.}
+    \includegraphics[width=\textwidth,height=0.30\textheight,keepaspectratio]{fig5_tour_zoom.png}
+    \caption{Tour time zoom ($0<\Gamma<0.5$): transition points match headway bifurcations exactly.}
     \label{fig:fig5_tour_zoom}
-\end{figure}
+\end{figure*}
 
-\subsection{Return Maps}
-A return map plots a variable at step $m+1$ against step $m$. If the dynamics were stochastic, the map would show a structureless cloud of points; deterministic dynamics instead produce geometric structure.
+\subsection{Return Maps (Fig.~6)}
 
-Figure \ref{fig:fig6_return_map} displays the return maps of the time headway of Bus 1, plotting $H_1(m+1)$ against $H_1(m)$ for four distinct values of the loading parameter $\Gamma$. 
-
-\begin{figure}[htbp]
+\begin{figure*}[tbp]
     \centering
-    % Replace 'fig6_return_map.png' with your actual image file name
-    \includegraphics[width=\textwidth]{fig6_return_map.png}
-    \caption{Return maps of the time headway of Bus 1, plotting $H_1(m+1)$ against $H_1(m)$ for trips $m = 1000$ to $2000$. The parameters are $S_1 = 0.5, S_2 = 0.2$, evaluated at (a) $\Gamma = 0.2$, (b) $\Gamma = 0.3$, (c) $\Gamma = 0.5$, and (d) $\Gamma = 0.8$.}
+    \includegraphics[width=\textwidth,height=0.43\textheight,keepaspectratio]{fig6_return_map.png}
+    \caption{Return maps $H_1(m{+}1)$ vs.\ $H_1(m)$, trips 1000--2000. $S_1\!=\!0.5$, $S_2\!=\!0.2$. (a)~$\Gamma\!=\!0.2$: period-11 orbit; (b)~$\Gamma\!=\!0.3$: piecewise-linear curve; (c,d) progressive fragmentation.}
     \label{fig:fig6_return_map}
-\end{figure}
+\end{figure*}
 
-For $\Gamma = 0.2$ (Figure \ref{fig:fig6_return_map}a), the system is periodic: the map shows a finite set of discrete points. For $\Gamma = 0.3$ and $\Gamma = 0.5$, the points form continuous piecewise curves---the signature of deterministic chaos, where successive headways follow a well-defined functional relationship rather than random scatter. At $\Gamma = 0.8$, the curves fill a larger region, indicating stronger chaotic mixing. These structures confirm that the headway fluctuations are governed by the nonlinear map, not by randomness.
+Return maps (Fig.~\ref{fig:fig6_return_map}) diagnose the regime. At $\Gamma=0.2$: exactly 11 discrete points (period-11 orbit). At $\Gamma=0.3$: a piecewise-linear curve---the hallmark of deterministic chaos; the ascending branch has slope $>1$, consistent with sensitive dependence on initial conditions. By $\Gamma=0.8$ the attractor has fragmented into multiple crossing strands. In all cases \emph{geometric structure is present}: the dynamics are governed by the nonlinear map, not by noise.
 
-\subsection{Statistical Analysis: Mean and RMS}
-We computed the mean and root-mean-square (RMS) of headways and tour times across the full range of $\Gamma$. An RMS of zero indicates regular motion (constant headway); a non-zero RMS indicates periodic or chaotic fluctuation.
+\subsection{Statistical Analysis (Fig.~7)}
 
-\begin{figure}[htbp]
+\begin{figure*}[tbp]
     \centering
-    % Replace 'fig7_stats.png' with your actual image file name
-    \includegraphics[width=\textwidth]{fig7_stats.png}
-    \caption{Statistical measures of the bus dynamics. (a) Mean headways and tour times across the full range of $\Gamma$. (b) Enlargement of mean values for $0 < \Gamma < 0.5$. (c) RMS values across the full range. (d) Enlargement of RMS values for $0 < \Gamma < 0.5$, clearly showing the exact point where RMS diverges from zero.}
+    \includegraphics[width=\textwidth,height=0.43\textheight,keepaspectratio]{fig7_stats.png}
+    \caption{Mean (a,b) and RMS (c,d) of headway and tour time vs.\ $\Gamma$. Insets zoom to $0<\Gamma<0.5$. Points 1, 2, 3 mark transition loadings computed numerically.}
     \label{fig:fig7_stats}
-\end{figure}
+\end{figure*}
 
-As shown in Figures \ref{fig:fig7_stats}(c) and (d), the RMS remains zero until $\Gamma \approx 0.167$, where it jumps sharply---marking the transition from regular to periodic/chaotic motion. The differing RMS profiles of Bus~1 and Bus~2 reflect the asymmetric dynamics discussed in Section~4.2.
+Figure~\ref{fig:fig7_stats}: RMS is zero for $\Gamma<0.167$ (regular) and jumps sharply at \textbf{Point 1} ($\Gamma\approx0.167$). Past Point~1, Bus~2's mean headway ($S_2=0.2$, weaker correction) drops sharply toward zero while Bus~1's rises---Bus~2 is closer to bunching. Means cross at \textbf{Point 2} ($\Gamma\approx0.333$). \textbf{Point 3} ($\Gamma\approx0.407$) marks the tour-time RMS minimum. Near-vertical spikes above $\Gamma\approx1.3$ are resonance windows where the system briefly re-synchronises.
 
-\section{Phase Diagram and Limitations}
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Phase Diagram and Analysis}
 
-\subsection{Phase Diagram}
-
-Using the RMS threshold from the previous section, we implemented a bisection search to locate the transition value $\Gamma^*$ for each equal speedup $S_1 = S_2 = S$. The resulting phase diagram is shown in Figure~\ref{fig:fig8_phase_diagram}.
+\subsection{Phase Boundary $\Gamma^*(S)$ (Fig.~8)}
 
 \begin{figure}[htbp]
     \centering
-    % Replace 'phase_diagram.png' with your actual image file name
-    \includegraphics[width=0.7\textwidth]{fig8_phase_diagram.png} 
-    \caption{Phase diagram (region map) outlining the stability boundaries of the transit system in the parameter space of Loading ($\Gamma$) and Speedup ($S$), where $S_1 = S_2 = S$. The dotted curve represents the transition boundary.}
+    \includegraphics[width=\columnwidth]{fig8_phase_diagram.png}
+    \caption{Phase diagram: numerically determined boundary $\Gamma^*(S)$ for $S_1\!=\!S_2\!=\!S$ by bisection. Above the curve: regular motion; below: periodic/chaotic.}
     \label{fig:fig8_phase_diagram}
 \end{figure}
 
-Above the transition curve lies the \textbf{regular motion regime}; below it lies the \textbf{periodic or chaotic regime}. The boundary $\Gamma^*(S)$ was determined numerically by bisection search for each value of $S$; no closed-form expression is given in the original paper. The curve shows that higher speedup $S$ permits operation at higher loading $\Gamma$ without entering chaos. A transit operator could in principle read the required minimum speedup directly from this diagram for a given passenger load.
+We locate $\Gamma^*(S)$ by bisection search on $\Gamma$ for each symmetric speedup $S_1=S_2=S$, using an RMS threshold to detect chaos. The boundary (Fig.~\ref{fig:fig8_phase_diagram}) is concave-upward: early units of speedup yield diminishing returns in expanding the safe loading range. Section~\ref{sec:ext} shows this curve terminates at a finite $S_c$ beyond which the system is chaotic even at $\Gamma=0$.
 
 \subsection{Limitations}
 
-The model assumes constant passenger arrival rate $\mu$, linear boarding/alighting times, and no external stochastic factors (traffic, weather). These are strong simplifications. The model's value is that it identifies a deterministic instability mechanism---the positive feedback loop between headway and passenger load---that exists independently of noise. However, we did not test the model's sensitivity to perturbations (e.g.\ adding small noise to $\mu$ or varying initial conditions). The effect of stochastic perturbations on the bifurcation structure remains an open question: noise can either amplify chaos or, in some systems, induce order (noise-induced stabilisation). A full robustness analysis would require such perturbation experiments, which are beyond the scope of this replication.
+The model assumes constant $\mu$, linear dwell times, and no traffic noise. The RMS classification cannot distinguish high-period periodic orbits from broadband chaos; a rigorous separation requires return-map inspection (Fig.~\ref{fig:fig6_return_map}) or Lyapunov exponent computation, neither of which we automate.
 
-\FloatBarrier
-\section{Interactive Demonstration}
+\subsection{Sensitivity to Initial Conditions}
 
-In addition to the static figures, we developed a browser-based interactive simulator that allows real-time exploration of the Nagatani map. Figure~\ref{fig:demo} shows the simulator interface.
+\begin{figure*}[tbp]
+    \centering
+    \includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{fig_sensitivity_ic.png}
+    \caption{Bifurcation diagrams from six different initial conditions $(T_1(0),T_2(0))$. All panels are visually identical: the attractor is unique and independent of initial configuration after 1000-trip transient elimination.}
+    \label{fig:sensitivity_ic}
+\end{figure*}
+
+Figure~\ref{fig:sensitivity_ic} overlays bifurcation diagrams from six initial-condition pairs ranging from nearly equal $(0.4,0.6)$ to strongly asymmetric $(0.05,0.5)$. All six are visually indistinguishable: the same period-adding windows and chaotic bands appear at identical $\Gamma$ values. This confirms (i) 1000 trips is sufficient for transient decay, and (ii) the attractor is unique---no coexisting attractors exist for the paper's parameter set.
+
+\subsection{Robustness to Noise}
+
+\begin{figure*}[tbp]
+    \centering
+    \includegraphics[width=\textwidth,height=0.37\textheight,keepaspectratio]{fig_sensitivity_noise.png}
+    \caption{Bifurcation diagrams under additive noise $\xi\sim\mathcal{N}(0,\sigma^2)$ on $H$ per trip. Left to right: $\sigma=0,\,0.005,\,0.02,\,0.05$ (0--5\% of mean headway). Chaos persists at all levels; fine periodic windows erode first.}
+    \label{fig:sensitivity_noise}
+\end{figure*}
+
+We add $\xi_m\sim\mathcal{N}(0,\sigma^2)$ to $H$ each trip before evaluating Eq.~\eqref{eq:final_map}, modelling per-trip timing uncertainty. Three findings from Fig.~\ref{fig:sensitivity_noise}:
+\begin{enumerate}[leftmargin=*,itemsep=0pt,topsep=2pt]
+    \item \textbf{Chaotic regime is robust.} Even at $\sigma=0.05$ (5\% noise) the broad headway scatter above $\Gamma^*$ persists unchanged. Noise fills the attractor but does not destroy it.
+    \item \textbf{$\Gamma^*$ is stable.} The transition point does not visibly shift between $\sigma=0$ and $\sigma=0.05$: the positive-feedback instability is too strong to suppress with small perturbations.
+    \item \textbf{Periodic windows erode first.} Fine-scale period-adding windows (high-period orbits with narrow basins) blur already at $\sigma=0.005$; by $\sigma=0.02$ they merge into the chaotic band. In real systems one would observe a gradual onset rather than the discrete $3\to5\to7$ sequence.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Extension: $M=3$ Buses}
+\label{sec:ext}
+
+Generalising to $M=3$ requires \textbf{no new model}: Eq.~\eqref{eq:final_map} is iterated verbatim; the only change is that $i'$ is selected from two other buses instead of one. No new parameter beyond $S_3$ is introduced, and the simulation algorithm is unchanged.
+
+\subsection{Bifurcation Diagrams (Fig.~9)}
+
+\begin{figure*}[tbp]
+    \centering
+    \includegraphics[width=0.49\textwidth,height=0.34\textheight,keepaspectratio]{fig9a_three_bus_S0.png}\hfill
+    \includegraphics[width=0.49\textwidth,height=0.34\textheight,keepaspectratio]{fig9b_three_bus_S0.2.png}
+    \caption{Left — Case A ($S=(0,0,0)$): no stable regime at any $\Gamma>0$.
+    Right — Case B ($S=(0.2,0.2,0.2)$): shared bifurcation at $\Gamma^*=0.1733$ vs.\ $0.1685$ for $M=2$ (shift $<0.005$).}
+    \label{fig:fig9a_three_bus}\label{fig:fig9b_three_bus}
+\end{figure*}
+
+\begin{figure*}[tbp]
+    \centering
+    \includegraphics[width=\textwidth,height=0.34\textheight,keepaspectratio]{fig9c_three_bus_graded.png}
+    \caption{Case C ($S=(0.5,0.3,0.2)$): graded speedup; weakest bus fluctuates most, same qualitative picture as Fig.~\ref{fig:fig2_bifurcation}(d).}
+    \label{fig:fig9c_three_bus}
+\end{figure*}
+
+Three cases directly parallel the $M=2$ study. \textbf{Case A} ($S=(0,0,0)$, Fig.~\ref{fig:fig9a_three_bus}): no regularity at any $\Gamma$. \textbf{Case B} ($S=(0.2,0.2,0.2)$, Fig.~\ref{fig:fig9b_three_bus}): symmetric bifurcation at $\Gamma^*=0.1733$ vs.\ $\Gamma^*=0.1685$ for $M=2$---negligible shift. \textbf{Case C} ($S=(0.5,0.3,0.2)$, Fig.~\ref{fig:fig9c_three_bus}): graded response; weakest bus fluctuates most, qualitatively identical to the two-bus asymmetric case. The period-adding $3\to5\to7$ cascade is present in all cases.
+
+\subsection{Return Maps Become Two-Valued (Fig.~10)}
+
+\begin{figure*}[tbp]
+    \centering
+    \includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{fig10_three_bus_returnmap.png}
+    \caption{$M=3$ return maps for Bus~1, coloured by predecessor identity. At high $\Gamma$ the two branches separate: the same $H_1(m)$ maps to different $H_1(m+1)$ depending on which bus preceded it.}
+    \label{fig:fig10_three_bus}
+\end{figure*}
+
+With $M=2$ each bus has one possible predecessor, so $H_1(m+1)=f(H_1(m))$ is a true function. With $M=3$, Bus~1's predecessor alternates between Buses~2 and~3. Figure~\ref{fig:fig10_three_bus} colours points by predecessor. At $\Gamma=0.2$--$0.3$ the branches nearly overlap; by $\Gamma=0.5$--$0.8$ they visibly separate. The map $H_1(m+1)=f(H_1(m))$ is therefore \emph{not a function} of a single variable---the attractor lives in a genuinely higher-dimensional state space, though the dynamics remain completely deterministic once predecessor identity is included.
+
+\subsection{Phase Boundary and Speedup Ceiling (Fig.~11)}
+
+\begin{figure*}[tbp]
+    \centering
+    \includegraphics[width=\textwidth,height=0.30\textheight,keepaspectratio]{fig11_three_bus_phase.png}
+    \caption{Left: phase boundary $\Gamma^*(S)$ for $M=2$ vs.\ $M=3$ (symmetric speedup); dotted lines mark $S_c$. Centre/right: mean and RMS headway at $S=0.3$.}
+    \label{fig:fig11_three_bus}
+\end{figure*}
+
+Figure~\ref{fig:fig11_three_bus} compares $M=2$ and $M=3$ directly. Three findings:
+\begin{enumerate}[leftmargin=*,itemsep=0pt,topsep=2pt]
+    \item \textbf{$\Gamma^*$ barely changes with $M$.} For $S=0.25$: $\Gamma^*(M=2)=0.204$ vs.\ $\Gamma^*(M=3)=0.212$. The onset of chaos depends on the local feedback between consecutive arrivals, not on how many buses share the route.
+    \item \textbf{Mean headway tightens.} At $\Gamma=0.3$, $S=0.3$: Bus~1's mean headway is $0.508$ with $M=2$ but only $0.341$ with $M=3$, close to the $2/3$ naive scaling, confirming the simulator correctly captures denser packing.
+    \item \textbf{Speedup has a hard ceiling, lower for $M=3$.} Bisecting on $S$ at $\Gamma=0$ finds $S_c\approx2.0$ for $M=2$ and $S_c\approx1.6$ for $M=3$. Beyond $S_c$, the correction overcompensates every trip and generates chaos with no passenger load required. This is a mathematical property of the map when $\Gamma$ and $S$ are varied independently; physically, $\Gamma=\mu(\gamma+\eta)$ and $S_i\propto\mu(\gamma+\eta)$ share the same boarding-rate factor, so $\Gamma=0$ would also force $S_i=0$.
+\end{enumerate}
+
+\subsection{Summary: $M=3$ Generalises $M=2$}
+
+The same map, the same algorithm, and the same diagnostic tools apply to $M=3$ without modification. Every qualitative insight---period-adding route to chaos, deterministic return-map structure, RMS-detectable transition, speedup as a bounded control---reproduces for three buses. Two new \emph{effects} (not mechanisms) emerge only at $M\geq3$: the return map becomes multi-valued in a single headway variable, and $S_c$ drops substantially. The formula and insights generalise; only numbers shift.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Interactive Demo}
+
+A standalone browser demo (\texttt{sim.html}, no build step required) implements the same event-driven algorithm in JavaScript, animating buses around an elliptical track with arc-length-parameterised motion and plotting live per-bus return maps. Parameters $M\in[2,8]$, $\Gamma$, $S_i$, total trips and plot window are all adjustable. A screenshot is shown in Figure~\ref{fig:demo}.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.85\textwidth]{demo_screenshot.png}
-    \caption{Screenshot of the interactive simulator. The left panel shows two buses moving on a circular track with passenger counts; the right panel displays live headway, tour time, and return map plots that update as the simulation advances.}
+    \includegraphics[width=\columnwidth,height=0.22\textheight,keepaspectratio]{demo_screenshot.png}
+    \caption{Browser demo: animated track, formula breakdown, and live return maps.}
     \label{fig:demo}
 \end{figure}
 
-\begin{itemize}
-    \item \textbf{Parameter control:} The user can set $\Gamma$, $S_1$, and $S_2$ and observe the effect immediately.
-    \item \textbf{Animated track:} Two buses move around a circular track. Buses pause at the Origin (boarding) and Destination (alighting) for a duration proportional to the dwell fraction $\Gamma H / \Delta T$.
-    \item \textbf{Live graphs:} Headway, tour time, and return map plots update in real time as the simulation advances step by step.
-    \item \textbf{Playback controls:} Play/pause, single-step forward/backward by $\pm k$ steps, and adjustable speed.
-    \item \textbf{Passenger tracking:} A status bar displays the number of passengers waiting at the station and aboard each bus, along with the current RMS and regime indicator (Regular / Periodic / Chaotic / Diverged).
-    \item \textbf{Auto-pause:} The simulator automatically pauses when it detects the onset of chaos or divergence.
-\end{itemize}
-
-The simulation engine implements the same event-driven min-heap algorithm described in Section~3 and has been verified against the Python reference implementation to 6 decimal places.
-
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Conclusion}
 
-This report replicated the model and simulations of Nagatani~\cite{nagatani} for a two-bus shuttle system. The bifurcation diagrams, return maps, and RMS analysis all reproduce the paper's findings: as the loading parameter $\Gamma$ increases, the system transitions from regular motion through period-adding bifurcations into deterministic chaos. The return maps confirm that these fluctuations follow deterministic structure rather than random noise.
+We reproduced all figures of Nagatani~\cite{nagatani} for $M=2$ shuttle buses: period-adding bifurcations, piecewise-linear return maps confirming deterministic chaos, and a numerically determined phase boundary $\Gamma^*(S)$ showing speedup suppresses chaos with diminishing returns. Sensitivity tests show the attractor is unique (initial-condition independent) and structurally robust to timing noise up to 5\%, though fine periodic windows erode first. Extending to $M=3$ requires no new model; all qualitative findings generalise, with the return map becoming genuinely two-valued and the critical speedup ceiling dropping from $S_c\approx2.0$ to $\approx1.6$.
 
-The speedup parameter $S$ delays or suppresses the onset of chaos. The phase diagram (Figure~\ref{fig:fig8_phase_diagram}) maps the numerically determined boundary $\Gamma^*(S)$ between regular and chaotic regimes, providing a quantitative tool for determining the minimum speedup needed to maintain schedule regularity at a given passenger load.
+\printbibliography[heading=bibintoc,title={References}]
 
-\printbibliography
 \end{document}

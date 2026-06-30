@@ -2,6 +2,7 @@
 
 from .simulation import SimulationResult, simulate
 from .analysis import (
+    bifurcation_sweep,
     mean_headway,
     mean_tour_time,
     rms_headway,
@@ -13,6 +14,7 @@ from .analysis import (
 __all__ = [
     "SimulationResult",
     "simulate",
+    "bifurcation_sweep",
     "mean_headway",
     "mean_tour_time",
     "rms_headway",

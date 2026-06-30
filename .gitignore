@@ -33,8 +33,12 @@ awq-deck-v4.html
 HUST_THEME_BEAMER___LATEX_BY_FRC.zip
 math_model.zip
 tzfhx79fnc-castle.zip
-/fig[1-8].png
-reimplement_fig7_points.ipynb
+
+# Loose PNGs written to repo root when re-running the notebooks (already embedded as
+# notebook cell outputs; regenerate by re-running reimplement_2bus.ipynb / _3bus.ipynb)
+/fig[1-9]*.png
+/fig10.png
+/fig11.png
 
 # OS
 .DS_Store

@@ -8,17 +8,19 @@ This is a course project (Mathematical Modelling 2025.2) that reproduces all fig
 
 > Takashi Nagatani (2006), *Chaos control and schedule of shuttle buses*, Physica A 371, 683–691.
 
-The actual code lives in the `project/` subdirectory. The repo root also contains the source paper PDF and a working notebook (`reimplement.ipynb`), but all development happens under `project/`.
+The actual code lives in the `project/` subdirectory. The repo root also contains the source paper PDF and two standalone, self-contained notebooks (no dependency on `project/src`; only `requirements.txt`): `reimplement_2bus.ipynb` (paper Fig. 2-8, M=2) and `reimplement_3bus.ipynb` (M=3 extension, Fig. 9-11) — but all development happens under `project/`.
 
 ## Commands (run from `project/`)
 
 ```bash
-make setup            # create .venv and pip install -e ".[dev]"
-make figures          # regenerate all figures (Fig. 2-8) into results/
-make test             # run pytest
-make lint             # ruff check src experiments tests
-make notebook         # open notebooks/reproduction.ipynb in JupyterLab
-make clean            # remove results/*.png, .venv, __pycache__, .pytest_cache
+make setup               # create .venv and pip install -e ".[dev]"
+make figures             # regenerate Fig. 2-11 (paper Fig. 2-8 + M=3 extension Fig. 9-11) into results/
+make figures-paper       # regenerate only the paper's M=2 figures (Fig. 2-8)
+make figures-extension   # regenerate only the M=3 extension figures (Fig. 9-11)
+make test                # run pytest
+make lint                # ruff check src experiments tests
+make notebook            # open notebooks/reproduction.ipynb in JupyterLab
+make clean               # remove results/*.png, .venv, __pycache__, .pytest_cache
 ```
 
 To regenerate a single figure:
@@ -47,9 +49,10 @@ H_i(m)   = T_i(m) - T_{i'}(m')
 where `T_i(m)` is bus `i`'s arrival time at the origin on trip `m`, `G` is the loading parameter, `S_i` is bus `i`'s speedup parameter, and `i'`/`m'` are the predecessor bus/trip — *not fixed in advance* because buses can overtake each other.
 
 - **`src/nagatani/simulation.py`** — the core. `simulate(G, S, M=2, num_trips, transient, initial_arrivals)` runs an event-driven simulation using a min-heap of `(T, bus_id, trip)` events: pop the next-arriving bus, treat the previously-popped bus as its predecessor, compute headway `H` and tour time `DT = G*H + 1/(1+S_i*H)`, push the bus's next arrival back onto the heap. Returns a `SimulationResult` (frozen dataclass) with `headway`, `tour_time`, `arrival_time` arrays of shape `(M, num_trips)`. `.steady_state(transient=...)` drops initial transient trips (paper uses 900). `headway_diverged()` flags `G > 2` divergence.
-- **`src/nagatani/analysis.py`** — statistics over `SimulationResult`: `mean_headway`, `mean_tour_time`, `rms_headway`, `rms_tour_time`, `is_chaotic` (RMS threshold heuristic), and `transition_loading` (bisection search for the regular/chaotic boundary `G*` given symmetric `S`, used for the Fig. 8 phase diagram).
+- **`src/nagatani/analysis.py`** — statistics over `SimulationResult`: `mean_headway`, `mean_tour_time`, `rms_headway`, `rms_tour_time`, `is_chaotic` (RMS threshold heuristic), `transition_loading` (bisection search for the regular/chaotic boundary `G*` given symmetric `S` and any `M`, used for Fig. 8 and Fig. 11), and `bifurcation_sweep(M, S, Gs, ...)` (M-agnostic helper used by every bifurcation figure, Fig. 2 and Fig. 9 alike).
 - **`src/nagatani/plotting.py`** — shared matplotlib style (`setup_style()`) and `save(fig, name)` which writes PNGs (300 dpi) to `results/`.
-- **`experiments/fig*.py`** — one script per paper figure (Fig. 2–8), each importing `simulate`/analysis functions and `nagatani.plotting`, exposing a `run(...)` function and a `__main__` entry point that calls it with paper-matching defaults. New figures should follow this same `run()` + `__main__` pattern.
+- **`experiments/fig{2..8}*.py`** — one script per paper figure (`M=2`), each importing `simulate`/analysis functions and `nagatani.plotting`, exposing a `run(...)` function and a `__main__` entry point that calls it with paper-matching defaults. New figures should follow this same `run()` + `__main__` pattern.
+- **`experiments/fig{9,10,11}_three_bus_*.py`** — our own extension to `M=3` (not in the paper): Fig. 9a/9b/9c (bifurcation, three speedup cases), Fig. 10 (return map coloured by predecessor identity), Fig. 11 (phase boundary `M=2` vs `M=3` + critical speedup `S_c`). See `project/README.md` §3 and `report/main.tex` §6 for the write-up.
 
 ### Key parameters used throughout
 

@@ -223,36 +223,78 @@
 \section{Results: Time Series}
 % =====================================================================
 
-\begin{frame}{Time Series: Headway Dynamics}
+\begin{frame}{Fig. 2 --- Bifurcation Diagrams: Headway vs.\ $\Gamma$}
 	\begin{columns}[T]
-		\begin{column}{0.5\textwidth}
+		\begin{column}{0.55\textwidth}
 			\centering
 			\includegraphics[width=\textwidth]{fig2_time_headway.png}
 		\end{column}
-		\begin{column}{0.5\textwidth}
+		\begin{column}{0.43\textwidth}
+			\small
+			\begin{itemize}
+				\item \textbf{(a) $S_1=S_2=0$:} fluctuation starts at $\Gamma\to0$ -- \alert{no regular regime at all}. Without speedup there is zero stability margin.
+				\item \textbf{(b) $S_1=S_2=0.2$:} headway is \emph{exactly} constant until $\Gamma\approx0.167$, then bifurcates.
+				\item \textbf{(c)/(d) unequal $S$:} same bifurcation point, but a visibly wider fan of periodic branches first.
+				\item All panels share the same shape: a triangular cloud whose \emph{width} grows roughly linearly with $\Gamma$ -- variability, not just the mean, gets worse with load.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Fig. 3 --- Zoom: Period-Adding Route to Chaos}
+	\begin{columns}[T]
+		\begin{column}{0.55\textwidth}
 			\centering
 			\includegraphics[width=\textwidth]{fig3_zoom.png}
 		\end{column}
+		\begin{column}{0.43\textwidth}
+			\footnotesize
+			\begin{itemize}
+				\item At $\Gamma=0.167$ the constant headway splits into a periodic orbit whose period grows by \emph{addition}: $3\to5\to7\to\ldots$
+				\item This is \textbf{period-adding}, \emph{not} period-doubling ($2\to4\to8$) -- a different, less commonly taught route to chaos.
+				\item By $\Gamma\approx0.248$ the orbits dissolve into a dense chaotic band.
+				\item Panel (b) shows a short \emph{isolated} window of regularity right after the first bifurcation, before the wider chaotic band develops -- the kind of regularity window familiar from the logistic map.
+				\item Panel (a) ($S=0$): the fan starts at $\Gamma\to0$ itself, confirming no stability margin without speedup.
+			\end{itemize}
+		\end{column}
 	\end{columns}
-
-	\vspace{0.5em}
-	For small $\Gamma$, the headways quickly converge to a fixed value (\textbf{regular motion}). As $\Gamma$ increases past $\Gamma^*$, the headway begins to oscillate \textbf{periodically}, then \textbf{chaotically}.
 \end{frame}
 
-\begin{frame}{Time Series: Tour-Time Dynamics}
+\begin{frame}{Fig. 4 --- Tour-Time Dynamics: Overcompensation}
 	\begin{columns}[T]
-		\begin{column}{0.5\textwidth}
+		\begin{column}{0.55\textwidth}
+			\vspace{2.5cm}
 			\centering
 			\includegraphics[width=\textwidth]{fig4_tour_time.png}
 		\end{column}
-		\begin{column}{0.5\textwidth}
+		\begin{column}{0.43\textwidth}
+			\footnotesize
+			\begin{itemize}
+				\item Both buses ($S_1=0.5,\ S_2=0.2$) share identical tour time until $\Gamma=0.167$.
+				\item Past that point, \textbf{Bus 1} (stronger speedup) fluctuates with \emph{larger} amplitude: a big headway triggers a big speed-up, which \emph{overshoots} and produces a small headway next trip.
+				\item Bus 2 (weaker speedup) reacts less aggressively, so it stays more constrained -- at first.
+				\item Past $\Gamma\approx0.333$ the two buses \textbf{swap roles}: Bus 2 becomes the more erratic one. The buses are coupled through headway but respond very differently because $S_1\neq S_2$.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Fig. 5 --- Tour-Time Zoom: Coupled Breakdown}
+	\begin{columns}[T]
+		\begin{column}{0.55\textwidth}
+			\vspace{2.5cm}
 			\centering
 			\includegraphics[width=\textwidth]{fig5_zoom.png}
 		\end{column}
+		\begin{column}{0.43\textwidth}
+			\small
+			\begin{itemize}
+				\item The transition points visible here line up \emph{exactly} with the headway bifurcation points of Fig.~3.
+				\item This confirms the schedule breakdown is a single coupled event: the spacing between buses (headway) and the duration of each bus's own trip (tour time) destabilise \textbf{simultaneously}, not independently.
+				\item Tour time is therefore not an independent symptom -- it is mechanically tied to headway through the map itself (Eq.~5).
+			\end{itemize}
+		\end{column}
 	\end{columns}
-
-	\vspace{0.5em}
-	Tour time mirrors headway through the map: once headway oscillates chaotically, the round-trip duration fluctuates irregularly -- directly undermining \textbf{schedule reliability}.
 \end{frame}
 
 % =====================================================================
@@ -261,59 +303,183 @@
 \section{Results: Phase-Space Analysis}
 % =====================================================================
 
-\begin{frame}{Phase Space: Return Maps}
+\begin{frame}{Fig. 6 --- Return Maps: Deterministic Structure}
 	\begin{columns}[T]
 		\begin{column}{0.55\textwidth}
 			\centering
 			\includegraphics[width=0.85\textwidth]{fig6_return_map.png}
 		\end{column}
 		\begin{column}{0.45\textwidth}
-			\begin{block}{Reading the map}
-				\begin{itemize}
-					\item \textbf{$\Gamma = 0.2$}: periodic motion with period 11.
-					\item \textbf{$\Gamma = 0.3$}: piecewise map, chaotic motion with a single extended distribution.
-					\item \textbf{$\Gamma = 0.5$}: piecewise map, chaotic motion with two extended distributions.
-					\item \textbf{$\Gamma = 0.8$}: very complex piecewise map, multi-valued function, chaotic motion with a single extended distribution.
-				\end{itemize}
-			\end{block}
+			\footnotesize
+			\setlength{\itemsep}{0pt}
+			\begin{itemize}
+				\item \textbf{$\Gamma=0.2$:} 11 points -- \textbf{period-11}, matching Fig.~3's sequence.
+				\item \textbf{$\Gamma=0.3$:} piecewise-linear curve; ascending slope $>1$ -- sensitive dependence on initial conditions.
+				\item \textbf{$\Gamma=0.5$:} curve splits into \emph{multiple} branches.
+				\item \textbf{$\Gamma=0.8$:} many crossing strands -- each bifurcation folds the map again.
+				\item Structured curve, not a scattered cloud: proof of \alert{deterministic} chaos, not noise.
+			\end{itemize}
 		\end{column}
 	\end{columns}
 \end{frame}
 
-\begin{frame}{Phase Space: Mean and RMS Statistics}
+\begin{frame}{Fig. 7 --- Mean and RMS: Three Transition Points}
 	\begin{columns}[T]
 		\begin{column}{0.55\textwidth}
 			\centering
 			\includegraphics[width=0.95\textwidth]{fig7_mean_rms.png}
 		\end{column}
 		\begin{column}{0.45\textwidth}
-			\begin{block}{Reading the curves}
-				\begin{itemize}
-					\item \textbf{RMS $\approx 0$}: for small $\Gamma$ -- headway converges to a constant (regular).
-					\item \textbf{RMS jumps sharply}: at $\Gamma=\Gamma^*$ -- the onset of periodic/chaotic oscillation.
-					\item \textbf{Mean tour time} grows quickly as $\Gamma \to 2$, foreshadowing collapse.
-				\end{itemize}
-			\end{block}
+			\footnotesize
+			\begin{itemize}
+				\item \textbf{Point 1} ($\Gamma\approx0.167$): RMS leaves zero -- onset of non-regular motion.
+				\item Just past Point 1, mean headway of Bus~2 (weak speedup) \emph{drops} toward zero while Bus~1's \emph{rises} -- Bus~2 is, on average, closer to bunching with its predecessor.
+				\item \textbf{Point 2} ($\Gamma\approx0.333$): the two means \emph{cross} -- the buses swap roles (matches Fig.~4).
+				\item \textbf{Point 3:} local minimum of tour-time RMS, after which both buses' variability grows monotonically toward the $\Gamma=2$ divergence.
+				\item Full-range panels (a)/(c) show narrow resonance spikes above $\Gamma\approx1.3$ -- brief re-synchronisation into low-period orbits before chaos resumes.
+			\end{itemize}
 		\end{column}
 	\end{columns}
 \end{frame}
 
-\begin{frame}{Phase Space: The Phase Diagram}
+\begin{frame}{Fig. 8 --- Phase Diagram: Where Speedup Helps}
 	\begin{columns}[T]
 		\begin{column}{0.55\textwidth}
 			\centering
 			\includegraphics[width=0.95\textwidth]{fig8_phase_diagram.png}
 		\end{column}
 		\begin{column}{0.45\textwidth}
-			\begin{block}{Two regimes}
-				For the symmetric case $S_1=S_2=S$, there exists a critical loading $\Gamma^*(S)$ separating \textbf{regular motion} (below) from \textbf{periodic or chaotic motion} (above).
-			\end{block}
+			\footnotesize
+			\setlength{\itemsep}{0pt}
 			\begin{itemize}
-				\item No closed-form expression for $\Gamma^*(S)$ exists.
-				\item The boundary is \textbf{determined numerically} by bisection search (diamonds in figure).
+				\item Symmetric case $S_1=S_2=S$: a critical loading $\Gamma^*(S)$ separates \textbf{regular} (above) from \textbf{periodic/chaotic} (below).
+				\item No closed-form $\Gamma^*(S)$ exists -- determined \textbf{numerically} by bisection search.
+				\item Convex curve: each extra unit of speedup buys a \emph{smaller} gain in safe loading at low $S$, then steepens above $S\approx2$.
+				\item \alert{Diminishing returns aren't the whole story} -- our own search finds the curve cannot rise forever (see $M=3$ section).
 			\end{itemize}
 		\end{column}
 	\end{columns}
+\end{frame}
+
+% =====================================================================
+\useStyleHustFull
+\useThinBar
+\section{Extension: Three Buses}
+% =====================================================================
+
+\begin{frame}{Generalising Beyond $M=2$}
+	\footnotesize
+	The paper studies only $M=2$ buses. Our event-driven simulator never assumed $M=2$ -- at each step, the popped bus's predecessor is simply whichever bus arrived most recently, regardless of how many buses exist.
+
+	\vspace{0.3em}
+	\alert{No new model is needed for $M=3$:} the exact same map $T_i(m{+}1)=T_i(m)+\Gamma H_i(m)+\frac{1}{1+S_i H_i(m)}$ is applied verbatim -- only the predecessor $i'$ is now chosen among \emph{two} other buses instead of one.
+
+	\vspace{0.3em}
+	\textbf{What we made fully general (code):}
+	\begin{itemize}
+		\setlength{\itemsep}{0pt}
+		\item \texttt{simulate(G, S, M, ...)} already accepted arbitrary $M$ -- no change needed.
+		\item A single \texttt{bifurcation\_sweep(M, S, Gs, ...)} helper now drives every bifurcation figure, for $M=2$ \emph{or} $M=3$.
+		\item Interactive demo: parameter panel and return-map grid generated dynamically for any $M\in[2,8]$.
+	\end{itemize}
+
+	\vspace{0.2em}
+	\textbf{Question:} does adding a third bus make chaos better or worse?
+\end{frame}
+
+\begin{frame}{Three Speedup Cases for $M=3$}
+	\footnotesize
+	We mirror the three key $M=2$ cases from Fig.~2, with a third bus inserted: \textbf{Case A} $S=(0,0,0)$ (cf.\ Fig.~2a), \textbf{Case B} $S=(0.2,0.2,0.2)$ (cf.\ Fig.~2b), \textbf{Case C} $S=(0.5,0.3,0.2)$ (cf.\ Fig.~2d).
+
+	\vspace{0.2em}
+	\begin{columns}[T]
+		\begin{column}{0.5\textwidth}
+			\centering
+			\includegraphics[width=\textwidth,height=4.6cm,keepaspectratio]{fig9a_three_bus_S0.png}\\
+			\footnotesize Case A: chaos from $\Gamma\to0$, just like $M=2$.
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\centering
+			\includegraphics[width=\textwidth,height=4.6cm,keepaspectratio]{fig9b_three_bus_S0.2.png}\\
+			\footnotesize Case B: shared, symmetric bifurcation point.
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Case C: Graded Speedup with Three Buses}
+	\begin{columns}[T]
+		\begin{column}{0.55\textwidth}
+			\vspace{2cm}
+			\centering
+			\includegraphics[width=\textwidth]{fig9c_three_bus_graded.png}
+		\end{column}
+		\begin{column}{0.43\textwidth}
+			\small
+			\begin{itemize}
+				\item Same period-adding route to chaos as $M=2$; the weakest-speedup bus ($S_3=0.2$) is the most violent at high $\Gamma$, just like Bus~2 was before.
+				\item All three buses bifurcate near $\Gamma\approx0.15$--$0.2$: chaos onset is a property of the \emph{whole coupled system}, not any single bus.
+				\item \alert{Quantitatively:} $\Gamma^*(M{=}3,S{=}0.2)=0.173$ vs.\ $\Gamma^*(M{=}2,S{=}0.2)=0.169$ -- a third bus delays chaos by less than $0.005$ in $\Gamma$. Essentially negligible at moderate speedup.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Fig. 10 --- Return Maps Become Two-Valued}
+	\begin{columns}[T]
+		\begin{column}{0.55\textwidth}
+			\centering
+			\includegraphics[width=0.8\textwidth]{fig10_three_bus_returnmap.png}
+		\end{column}
+		\begin{column}{0.43\textwidth}
+			\footnotesize
+			\begin{itemize}
+				\item With $M=2$, a bus has exactly \emph{one} possible predecessor, so its return map is a clean function of $H(m)$ alone.
+				\item With $M=3$, Bus~1's predecessor alternates between Bus~2 and Bus~3. Colouring each point by predecessor identity reveals the structure.
+				\item At low $\Gamma$ the two predecessor branches (orange/green) overlap almost perfectly.
+				\item At high $\Gamma$ they \textbf{visibly separate}: the \emph{same} $H_1(m)$ can map to \emph{different} $H_1(m{+}1)$ depending on who arrived just before.
+				\item Still fully deterministic, but the attractor genuinely lives in a higher-dimensional space than $M=2$.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Fig. 11 --- The Speedup Ceiling}
+	\begin{columns}[T]
+		\begin{column}{0.62\textwidth}
+			\centering
+			\includegraphics[width=\textwidth]{fig11_three_bus_phase.png}
+		\end{column}
+		\begin{column}{0.36\textwidth}
+			\footnotesize
+			\begin{itemize}
+				\item \textbf{Left:} $\Gamma^*(S)$ for $M=2$ vs.\ $M=3$.
+				\item \textbf{Centre/right:} at $S=0.3$, $M=3$ has lower mean headway (tighter route sharing) but comparable RMS onset.
+				\item \alert{Headline:} bisecting on $S$ at $\Gamma=0$ finds a critical speedup $S_c$ beyond which the system is chaotic even with \emph{zero} load:
+				\[
+					S_c^{(2)}\approx2.39,\ \ S_c^{(3)}\approx1.47
+				\]
+				\item Beyond $S_c$: the speedup itself overcompensates every trip -- no loading needed.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Three Buses: Takeaways}
+	\footnotesize
+	\setlength{\itemsep}{1pt}
+	\begin{enumerate}
+		\item \alert{$M=3$ generalises, not replaces, $M=2$:} same map, same algorithm, same tools -- and \emph{every} qualitative insight (period-adding bifurcations, deterministic return maps, RMS-detectable transitions) reproduces identically for $M=3$.
+		\item \textbf{The transition loading $\Gamma^*$ barely moves.} A third bus delays chaos onset by under $0.005$ in $\Gamma$ at moderate symmetric speedup.
+		\item \textbf{Mean headway shrinks as expected.} More buses sharing the route pack arrivals tighter -- a useful sanity check, not a new finding.
+		\item \textbf{Two genuinely new effects appear only at $M\geq3$:}
+		\begin{itemize}
+			\item the return map becomes intrinsically two-valued in $H(m)$ alone (predecessor identity matters);
+			\item the maximum useful speedup before self-induced instability drops substantially ($2.39\to1.47$).
+		\end{itemize}
+	\end{enumerate}
+
+	\vspace{0.2em}
+	\alert{``Just add more speedup'' is not a universal fix} -- the safety margin for that strategy shrinks as more buses are added.
 \end{frame}
 
 % =====================================================================
@@ -332,12 +498,43 @@
 			\small
 			\textbf{What you can do:}
 			\begin{itemize}
-				\item Set $\Gamma$, $S_1$, $S_2$ and watch chaos unfold step-by-step.
+				\item Set the number of buses $M$ (2--8), $\Gamma$, and each bus's speedup $S_i$, and watch chaos unfold step-by-step.
 				\item Buses animate around the track in real time, pausing to board at the Origin and alight at the Destination.
-				\item Return-map plots update live.
+				\item One return-map plot per bus updates live, generated dynamically for whatever $M$ is chosen.
+				\item The same interface reproduces both the paper's $M=2$ figures and the $M=3$ extension just shown.
 			\end{itemize}
 		\end{column}
 	\end{columns}
+\end{frame}
+
+% =====================================================================
+\useStyleHustFull
+\useThinBar
+\section{Conclusion}
+% =====================================================================
+
+\begin{frame}{Conclusion}
+	\footnotesize
+	\setlength{\itemsep}{1pt}
+
+	\textbf{Paper reproduction (M=2):}
+	\begin{itemize}\setlength{\itemsep}{1pt}
+		\item All 7 figures of Nagatani (2006) reproduced from a single event-driven simulator.
+		\item Regular motion gives way to \textbf{period-adding bifurcations} ($3\to5\to7\to\cdots$), not period-doubling.
+		\item Return maps reveal \textbf{deterministic structure} — chaos is governed by the nonlinear map, not randomness.
+		\item Speedup $S$ delays chaos onset ($\Gamma^*$ rises with $S$), but the benefit \textbf{saturates and reverses} beyond a critical $S_c$.
+	\end{itemize}
+
+	\vspace{0.2em}
+	\textbf{Extension to M=3:}
+	\begin{itemize}\setlength{\itemsep}{1pt}
+		\item \alert{No new model needed} — the same map (Eq.~5) and the same algorithm handle any $M$.
+		\item Every qualitative insight carries over: same bifurcation route, same return-map structure, same RMS-detectable transitions.
+		\item Two new effects unique to $M\geq3$: return maps become \textbf{two-valued} (predecessor identity matters); critical speedup $S_c$ drops from $\approx2.0$ to $\approx1.6$.
+	\end{itemize}
+
+	\vspace{0.15em}
+	\alert{The model generalises, not just the numbers} — same equation, same code, same insights for any $M$.
 \end{frame}
 
 % =====================================================================

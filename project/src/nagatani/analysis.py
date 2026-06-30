@@ -35,6 +35,46 @@ def rms_tour_time(result: SimulationResult) -> np.ndarray:
     return np.sqrt(np.nanmean(centred**2, axis=1))
 
 
+def bifurcation_sweep(
+    *,
+    M: int,
+    S: float | tuple[float, ...],
+    Gs: np.ndarray,
+    num_trips: int = 1000,
+    transient: int = 900,
+) -> list[tuple[np.ndarray, np.ndarray]]:
+    """Sweep loading values ``Gs`` and collect every recorded headway per bus.
+
+    Generalises the bifurcation-diagram computation used by Fig. 2 (M=2) to
+    arbitrary ``M``. ``S`` may be a scalar (broadcast to all buses) or a
+    length-``M`` tuple of per-bus speedups.
+
+    Returns a list of length ``M``; entry ``i`` is a tuple
+    ``(G_values, headways)`` of matched 1-D arrays suitable for a scatter
+    plot of bus ``i``'s headway against the loading parameter.
+    """
+    per_bus_G: list[list[np.ndarray]] = [[] for _ in range(M)]
+    per_bus_H: list[list[np.ndarray]] = [[] for _ in range(M)]
+
+    for G in Gs:
+        res = simulate(G=G, S=S, M=M, num_trips=num_trips, transient=transient)
+        for i in range(M):
+            h = res.headway[i]
+            h = h[np.isfinite(h)]
+            if h.size == 0:
+                continue
+            per_bus_G[i].append(np.full_like(h, G))
+            per_bus_H[i].append(h)
+
+    out = []
+    for i in range(M):
+        if per_bus_G[i]:
+            out.append((np.concatenate(per_bus_G[i]), np.concatenate(per_bus_H[i])))
+        else:
+            out.append((np.array([]), np.array([])))
+    return out
+
+
 def is_chaotic(
     result: SimulationResult,
     *,
